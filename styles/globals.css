@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ====== GOOGLE FONTS ====== */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@400;500;600;700&display=swap');
+
+/* ====== BASE TYPOGRAPHY ====== */
+body {
+  @apply bg-white text-gray-800 font-[Montserrat];
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  color: #1F2D3D;
+}
+
+h1 {
+  @apply text-3xl font-semibold tracking-tight;
+}
+
+h2 {
+  @apply text-2xl font-medium text-gray-700;
+}
+
+/* ====== FORM ELEMENTS ====== */
+input, select, textarea {
+  @apply border border-blue-200 px-3 py-2 rounded-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition;
+}
+
+button {
+  @apply transition-all duration-200;
+}
+
+/* ====== BRAND COLORS ====== */
+:root {
+  --mm-blue-light: #E6F0FA;
+  --mm-blue: #4C9EFF;
+  --mm-blue-dark: #1A5DAB;
+  --mm-accent: #F7FAFC;
+  --mm-gray: #F1F5F9;
+  --mm-text: #1F2D3D;
+}
+
+/* ====== LAYOUT ====== */
+.main {
+  @apply min-h-screen bg-[var(--mm-accent)];
+}
+
+.card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-100 p-6;
+}
+
+/* ====== BUTTONS ====== */
+.btn-primary {
+  @apply bg-[var(--mm-blue)] text-white font-semibold py-2 px-4 rounded-md hover:bg-[var(--mm-blue-dark)] shadow-sm;
+}
+
+.btn-outline {
+  @apply border border-[var(--mm-blue)] text-[var(--mm-blue)] font-medium py-2 px-4 rounded-md hover:bg-[var(--mm-blue)] hover:text-white transition;
+}
+
+.btn-danger {
+  @apply bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600;
+}
+
+/* ====== TABLES ====== */
+table {
+  @apply w-full border-collapse;
+}
+
+th {
+  @apply bg-[var(--mm-blue-light)] text-[var(--mm-text)] font-medium text-sm p-3 text-left;
+}
+
+td {
+  @apply p-3 text-sm border-t border-gray-100;
+}
+
+tr:hover {
+  @apply bg-blue-50 transition;
+}
+
+/* ====== MOBILE RESPONSIVENESS ====== */
+@media (max-width: 640px) {
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  .card {
+    @apply p-4;
+  }
+
+  table {
+    @apply text-xs;
+  }
+
+  input, select, textarea {
+    @apply text-sm;
+  }
+}
+
+/* ====== PRINT STYLES ====== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #print-section, #print-section * {
+    visibility: visible;
+  }
+
+  #print-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
