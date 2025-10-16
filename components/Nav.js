@@ -5,7 +5,6 @@ import {
   faHome,
   faCog,
   faList,
-  faBoxes,
   faChartLine,
   faCaretRight,
   faCoins,
@@ -52,7 +51,6 @@ export default function Nav({ isOpen, onClose }) {
     </li>
   );
 
-  // Enhanced submenu with active highlighting
   const renderSubMenu = (items, parentKey) =>
     items.map(({ href, label }) => {
       const isActive = pathname === href;
@@ -76,7 +74,6 @@ export default function Nav({ isOpen, onClose }) {
       );
     });
 
-  // Helper to check if any submenu matches current path
   const isParentActive = (routes) => routes.some((r) => pathname.startsWith(r));
 
   return (
@@ -107,10 +104,8 @@ export default function Nav({ isOpen, onClose }) {
               className={
                 isParentActive([
                   "/manage/products",
-                  "/manage/archived",
                   "/manage/categories",
                   "/manage/orders",
-                  "/manage/staff",
                 ])
                   ? activeLink
                   : baseLink
@@ -143,54 +138,10 @@ export default function Nav({ isOpen, onClose }) {
                 {renderSubMenu(
                   [
                     { href: "/manage/products", label: "Product List" },
-                    { href: "/manage/archived", label: "Archived Products" },
                     { href: "/manage/categories", label: "Categories" },
                     { href: "/manage/orders", label: "Orders" },
-                    { href: "/manage/staff", label: "Staff" },
                   ],
                   "manage"
-                )}
-              </ul>
-            </li>
-
-            {/* Stock */}
-            <li
-              className={
-                isParentActive(["/stock/management", "/stock/movement"])
-                  ? activeLink
-                  : baseLink
-              }
-            >
-              <div
-                className="flex flex-col items-center justify-center cursor-pointer"
-                onClick={() => toggleMenu("stock")}
-              >
-                <FontAwesomeIcon icon={faBoxes} className="w-6 h-6 mb-1" />
-                <span className="text-xs">Stock</span>
-                <FontAwesomeIcon
-                  icon={faCaretRight}
-                  className={`w-4 h-4 mt-1 transition-transform duration-300 ${
-                    openMenu === "stock" ? "rotate-90" : ""
-                  }`}
-                />
-              </div>
-
-              <ul
-                className={`absolute left-full pt-10 top-0 w-52 bg-white border border-blue-100 h-screen shadow-md transition-all duration-300 ease-in-out z-50 ${
-                  openMenu === "stock"
-                    ? "translate-x-0 opacity-100"
-                    : "translate-x-48 opacity-0 pointer-events-none"
-                }`}
-              >
-                <div className="text-blue-700 font-semibold px-4 py-3 border-b border-blue-200 bg-blue-50">
-                  Stock Section
-                </div>
-                {renderSubMenu(
-                  [
-                    { href: "/stock/management", label: "Stock Management" },
-                    { href: "/stock/movement", label: "Stock Movement" },
-                  ],
-                  "stock"
                 )}
               </ul>
             </li>

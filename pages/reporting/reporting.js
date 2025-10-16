@@ -37,6 +37,7 @@ export default function Reporting() {
   const [selectedDays, setSelectedDays] = useState(14);
   const [granularity, setGranularity] = useState("Day");
 
+  // ✅ Update selectedDays when granularity changes
   const handleGranularityChange = (period) => {
     setGranularity(period);
     switch (period) {
@@ -55,28 +56,53 @@ export default function Reporting() {
     }
   };
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const query = new URLSearchParams({
-          location: selectedLocation,
-          days: selectedDays,
-          period: granularity,
-        });
-        const res = await fetch(`/api/reporting/reporting-data?${query}`);
-        const data = await res.json();
-        setReport(data);
-      } catch (err) {
-        console.error("Failed to fetch report:", err);
-      } finally {
+  // ✅ Fetch function (with cache)
+  async function fetchReportData(forceRefresh = false) {
+    try {
+      setLoading(true);
+
+      const cacheKey = `report_cache_${selectedLocation}_${selectedDays}_${granularity}`;
+      const cached = JSON.parse(localStorage.getItem(cacheKey));
+      const lastFetched = localStorage.getItem(`${cacheKey}_time`);
+      const cacheValid = cached && lastFetched && Date.now() - lastFetched < 12 * 60 * 60 * 1000;
+
+      // Use cached data if valid and not forcing refresh
+      if (cacheValid && !forceRefresh) {
+        setReport(cached);
         setLoading(false);
+
+        // Background refresh to keep data fresh
+        setTimeout(() => fetchReportData(true), 100);
+        return;
       }
+
+      // Fetch fresh data
+      const query = new URLSearchParams({
+        location: selectedLocation,
+        days: selectedDays,
+        period: granularity,
+      });
+      const res = await fetch(`/api/reports/reporting-data?${query}`);
+      const data = await res.json();
+
+      if (data) {
+        setReport(data);
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(`${cacheKey}_time`, Date.now());
+      }
+    } catch (err) {
+      console.error("Failed to fetch report:", err);
+    } finally {
+      setLoading(false);
     }
-    fetchData();
+  }
+
+  // ✅ Initial + dependency-based load
+  useEffect(() => {
+    fetchReportData();
   }, [selectedLocation, selectedDays, granularity]);
 
-  if (loading) {
+  if (loading && !report) {
     return (
       <Layout title="Reporting">
         <div className="flex justify-center items-center h-[70vh] bg-blue-50">
@@ -99,6 +125,7 @@ export default function Reporting() {
     summary = {},
   } = report;
 
+  // ✅ Chart configurations
   const combinedLineData = {
     labels: dates,
     datasets: [
@@ -172,9 +199,9 @@ export default function Reporting() {
 
   return (
     <Layout title="Reporting">
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 md:p-10 space-y-10">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 md:p-10 space-y-10 transition-all duration-300">
         {/* Header */}
-        <header className="">
+        <header>
           <h1 className="text-4xl font-extrabold text-blue-900 mb-2">
             M&M Fashion — Performance Report
           </h1>
@@ -231,10 +258,7 @@ export default function Reporting() {
               maintainAspectRatio: false,
               plugins: { legend: { labels: { color: "#1e3a8a" } } },
               scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: { color: "#1e3a8a" },
-                },
+                y: { beginAtZero: true, ticks: { color: "#1e3a8a" } },
                 y1: {
                   position: "right",
                   beginAtZero: true,

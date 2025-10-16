@@ -1,6 +1,7 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import Order from "@/models/Order";
 import mongoose from "mongoose";
+import Customer from "@/models/Customer";
 
 export default async function handler(req, res) {
   await mongooseConnect();
@@ -11,40 +12,45 @@ export default async function handler(req, res) {
     try {
       let query = {};
 
+      // 🔍 Search logic (by ID or customer fields)
       if (search) {
         if (mongoose.Types.ObjectId.isValid(search)) {
-          // Search directly by Order ID
           query = { _id: search };
         } else {
-          // Search by embedded customer fields
           query = {
             $or: [
-              { "customer.name": { $regex: search, $options: "i" } },
-              { "customer.email": { $regex: search, $options: "i" } },
-              { "customer.phone": { $regex: search, $options: "i" } },
+              { "shippingDetails.name": { $regex: search, $options: "i" } },
+              { "shippingDetails.email": { $regex: search, $options: "i" } },
+              { "shippingDetails.phone": { $regex: search, $options: "i" } },
             ],
           };
         }
       }
 
+      // 🔹 Count and paginate
       const total = await Order.countDocuments(query);
+      const totalPages = Math.ceil(total / limit);
 
+      // 🔹 Fetch orders and populate customer reference
       const orders = await Order.find(query)
+        .populate("customer") // ✅ This is the key change
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
-        .limit(Number(limit));
+        .limit(Number(limit))
+        .lean(); // Converts to plain objects for better performance
 
-      res.status(200).json({
-        orders: orders.map((o) => o.toObject()), // returns full customer object
-        totalPages: Math.ceil(total / limit),
+      return res.status(200).json({
+        orders,
+        totalPages,
         total,
       });
     } catch (error) {
-      console.error("Failed to fetch orders:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+      console.error("❌ Failed to fetch orders:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-  } 
-  
+  }
+
+  // 🔹 Update order status
   else if (req.method === "PUT") {
     try {
       const { id } = req.query;
@@ -56,14 +62,15 @@ export default async function handler(req, res) {
       order.status = status;
       await order.save();
 
-      res.status(200).json(order.toObject());
+      return res.status(200).json(order.toObject());
     } catch (error) {
-      console.error("Failed to update order:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+      console.error("❌ Failed to update order:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-  } 
-  
+  }
+
+  // 🔹 Invalid method
   else {
-    res.status(405).json({ error: "Method Not Allowed" });
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 }

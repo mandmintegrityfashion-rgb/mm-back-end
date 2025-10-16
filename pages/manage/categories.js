@@ -7,10 +7,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTrash,
   faEdit,
-  faSave,
-  faTimes,
   faPlus,
   faImages,
+  faSave,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import Loader from "@/components/Loader";
 
@@ -30,43 +30,36 @@ export default function Categories() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch categories
-  const fetchCategories = async () => {
-    try {
-      const res = await axios.get("/api/categories");
-      setCategories(res.data || []);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to fetch categories");
-    }
-  };
-
+  // ✅ Fetch categories once
   useEffect(() => {
-    fetchCategories();
+    (async () => {
+      try {
+        const res = await axios.get("/api/categories");
+        setCategories(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to fetch categories");
+      }
+    })();
   }, []);
 
-  // --- Image Upload ---
-  const uploadImage = async (ev, isEdit = false) => {
-    const files = ev.target.files;
+  // ✅ Image upload handler
+  const uploadImage = async (e, isEdit = false) => {
+    const files = e.target.files;
     if (!files?.length) return;
 
-    const previews = Array.from(files).map((f) => ({
-      full: URL.createObjectURL(f),
-      thumb: URL.createObjectURL(f),
+    const previews = Array.from(files).map((file) => ({
+      full: URL.createObjectURL(file),
+      thumb: URL.createObjectURL(file),
       isTemp: true,
     }));
 
-    if (isEdit) {
-      setEditedCategory((prev) => ({
-        ...prev,
-        images: previews,
-      }));
-    } else {
-      setImages(previews);
-    }
+    if (isEdit)
+      setEditedCategory((prev) => ({ ...prev, images: previews }));
+    else setImages(previews);
 
     const formData = new FormData();
-    for (const f of files) formData.append("file", f);
+    Array.from(files).forEach((f) => formData.append("file", f));
 
     setLoading(true);
     try {
@@ -75,40 +68,37 @@ export default function Categories() {
       const formatted = uploaded.map((link) => ({
         full: link.full || link,
         thumb: link.thumb || link,
-        isTemp: false,
       }));
 
-      if (isEdit) {
+      if (isEdit)
         setEditedCategory((prev) => ({ ...prev, images: formatted }));
-      } else {
-        setImages(formatted);
-      }
+      else setImages(formatted);
     } catch (err) {
-      alert("Upload failed");
+      console.error(err);
+      alert("Image upload failed");
     } finally {
       setLoading(false);
     }
   };
 
   const removeImage = (index, isEdit = false) => {
-    if (isEdit) {
+    if (isEdit)
       setEditedCategory((prev) => ({
         ...prev,
         images: prev.images.filter((_, i) => i !== index),
       }));
-    } else {
-      setImages((prev) => prev.filter((_, i) => i !== index));
-    }
+    else setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // ✅ Add, remove, and edit property pairs
   const addProperty = (isEdit = false) => {
-    const prop = { propName: "", propValue: "" };
+    const newProp = { propName: "", propValue: "" };
     if (isEdit)
       setEditedCategory((prev) => ({
         ...prev,
-        properties: [...prev.properties, prop],
+        properties: [...prev.properties, newProp],
       }));
-    else setProperties((prev) => [...prev, prop]);
+    else setProperties((prev) => [...prev, newProp]);
   };
 
   const handlePropertyChange = (index, key, value, isEdit = false) => {
@@ -117,6 +107,12 @@ export default function Categories() {
         const updated = [...prev.properties];
         updated[index][key] = value;
         return { ...prev, properties: updated };
+      });
+    } else {
+      setProperties((prev) => {
+        const updated = [...prev];
+        updated[index][key] = value;
+        return updated;
       });
     }
   };
@@ -127,13 +123,14 @@ export default function Categories() {
         ...prev,
         properties: prev.properties.filter((_, i) => i !== index),
       }));
+    else setProperties((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // --- Save New Category ---
-  const saveCategory = async (ev) => {
-    ev.preventDefault();
-    if (!name.trim() || !images.length)
-      return alert("Name and at least one image required");
+  // ✅ Save New Category
+  const saveCategory = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) return alert("Category name is required");
+    if (!images.length) return alert("Please upload at least one image");
 
     const formattedImages = images.map((img) => ({
       full: img.full,
@@ -152,26 +149,29 @@ export default function Categories() {
       setParentCategory("");
       setImages([]);
       setProperties([]);
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert("Failed to save category");
     }
   };
 
-  // --- Edit & Update ---
-  const handleEditClick = (index, category) => {
+  // ✅ Edit & Update
+  const handleEditClick = (index, cat) => {
     setEditIndex(index);
     setEditedCategory({
-      _id: category._id,
-      name: category.name || "",
-      parentCategory: category.parent?._id || "",
-      images: category.images || [],
-      properties: category.properties || [],
+      _id: cat._id,
+      name: cat.name,
+      parentCategory: cat.parent?._id || "",
+      images: cat.images || [],
+      properties: cat.properties || [],
     });
   };
 
   const handleUpdateClick = async (id) => {
-    if (!editedCategory.name.trim() || !editedCategory.images?.length)
-      return alert("Name and images required");
+    if (!editedCategory.name.trim())
+      return alert("Category name is required");
+    if (!editedCategory.images.length)
+      return alert("Please upload at least one image");
 
     const formattedImages = editedCategory.images.map((img) => ({
       full: img.full,
@@ -187,23 +187,26 @@ export default function Categories() {
       setCategories((prev) =>
         prev.map((cat) => (cat._id === id ? res.data : cat))
       );
-      handleCancelClick();
-    } catch {
-      alert("Update failed");
+      setEditIndex(null);
+      setEditedCategory({
+        name: "",
+        parentCategory: "",
+        images: [],
+        properties: [],
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update category");
     }
-  };
-
-  const handleCancelClick = () => {
-    setEditIndex(null);
-    setEditedCategory({ name: "", parentCategory: "", images: [], properties: [] });
   };
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this category?")) return;
     try {
       await axios.delete("/api/categories?id=" + id);
-      setCategories((prev) => prev.filter((cat) => cat._id !== id));
-    } catch {
+      setCategories((prev) => prev.filter((c) => c._id !== id));
+    } catch (err) {
+      console.error(err);
       alert("Delete failed");
     }
   };
@@ -216,10 +219,9 @@ export default function Categories() {
     <Layout>
       <div className="px-6 py-8 bg-gradient-to-b from-blue-50 to-white min-h-screen">
         <div className="max-w-6xl mx-auto space-y-8">
+          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-            <h1 className="text-3xl font-bold text-blue-700">
-            Categories
-            </h1>
+            <h1 className="text-3xl font-bold text-blue-700">Categories</h1>
             <input
               type="text"
               placeholder="Search categories..."
@@ -229,7 +231,7 @@ export default function Categories() {
             />
           </div>
 
-          {/* Add Category Card */}
+          {/* Add Category */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-100">
             <form onSubmit={saveCategory} className="space-y-6">
               <div className="flex items-center gap-2 border-b pb-3">
@@ -241,20 +243,20 @@ export default function Categories() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm text-blue-700 font-medium mb-1">
+                  <label className="block text-sm font-medium text-blue-700 mb-1">
                     Category Name
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter category name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter category name"
                     className="w-full border rounded-lg px-3 py-2 focus:ring-blue-400 focus:border-blue-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm text-blue-700 font-medium mb-1">
+                  <label className="block text-sm font-medium text-blue-700 mb-1">
                     Parent Category
                   </label>
                   <select
@@ -274,7 +276,7 @@ export default function Categories() {
 
               {/* Image Upload */}
               <div>
-                <label className="block text-sm text-blue-700 font-medium mb-2">
+                <label className="block text-sm font-medium text-blue-700 mb-2">
                   Images
                 </label>
                 <div className="flex flex-wrap gap-3">
@@ -293,12 +295,11 @@ export default function Categories() {
                     <div key={i} className="relative group">
                       <img
                         src={img.thumb || img.full}
-                        alt="category"
                         className="w-16 h-16 object-cover rounded-md border"
                       />
                       <button
                         type="button"
-                        onClick={() => removeImage(i, false)}
+                        onClick={() => removeImage(i)}
                         className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1 opacity-0 group-hover:opacity-100 transition"
                       >
                         ✕
@@ -330,35 +331,32 @@ export default function Categories() {
                 </tr>
               </thead>
               <tbody>
-                {filteredCategories.map((cat, index) => (
-                  <tr
-                    key={cat._id}
-                    className="border-b hover:bg-blue-50 transition"
-                  >
+                {filteredCategories.map((cat, i) => (
+                  <tr key={cat._id} className="border-b hover:bg-blue-50">
                     <td className="p-3">{cat.name}</td>
                     <td className="p-3">{cat.parent?.name || "-"}</td>
                     <td className="p-3 flex gap-2">
-                      {cat.images.map((img, i) => (
+                      {cat.images?.map((img, j) => (
                         <img
-                          key={i}
+                          key={j}
                           src={img.thumb || img.full}
                           className="w-10 h-10 object-cover rounded-md border"
                         />
                       ))}
                     </td>
                     <td className="p-3">
-                      {(cat.properties || []).map((p, i) => (
+                      {(cat.properties || []).map((p, k) => (
                         <span
-                          key={i}
+                          key={k}
                           className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-md border border-blue-100 mr-2"
                         >
                           {p.propName}: {p.propValue}
                         </span>
                       ))}
                     </td>
-                    <td className="p-3 text-center flex justify-center gap-3">
+                    <td className="p-3 flex justify-center gap-3">
                       <button
-                        onClick={() => handleEditClick(index, cat)}
+                        onClick={() => handleEditClick(i, cat)}
                         className="text-blue-600 hover:text-blue-800"
                       >
                         <FontAwesomeIcon icon={faEdit} />
@@ -374,7 +372,10 @@ export default function Categories() {
                 ))}
                 {filteredCategories.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="p-4 text-center text-gray-400">
+                    <td
+                      colSpan="5"
+                      className="p-4 text-center text-gray-400"
+                    >
                       No categories found
                     </td>
                   </tr>
