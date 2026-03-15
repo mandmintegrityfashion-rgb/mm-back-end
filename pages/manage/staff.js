@@ -81,7 +81,7 @@ export default function StaffPage() {
     <Layout>
       <div className="p-8 w-full mx-auto bg-gray-50 min-h-screen">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <h1 className="text-3xl font-bold text-blue-800">M&M Fashion Staff</h1>
+          <h1 className="text-3xl font-bold text-blue-800">M&M Fashion — Staff</h1>
           <p className="text-gray-500 mt-2 sm:mt-0">
             Manage all your staff accounts easily ✨
           </p>

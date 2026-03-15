@@ -218,10 +218,10 @@ export default function Categories() {
   return (
     <Layout>
       <div className="px-6 py-8 bg-gradient-to-b from-blue-50 to-white min-h-screen">
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-screen-xl mx-auto space-y-8">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-            <h1 className="text-3xl font-bold text-blue-700">Categories</h1>
+            <h1 className="text-3xl font-bold text-blue-800">M&M Fashion — Categories</h1>
             <input
               type="text"
               placeholder="Search categories..."
@@ -318,6 +318,155 @@ export default function Categories() {
             </form>
           </div>
 
+          {/* Edit Category Section */}
+          {editIndex !== null && editedCategory._id && (
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-200">
+              <div className="flex items-center gap-2 border-b pb-3 mb-4">
+                <FontAwesomeIcon icon={faEdit} className="text-blue-500" />
+                <h2 className="text-lg font-semibold text-blue-700">
+                  Edit Category
+                </h2>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-blue-700 mb-1">
+                      Category Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editedCategory.name}
+                      onChange={(e) =>
+                        setEditedCategory((prev) => ({ ...prev, name: e.target.value }))
+                      }
+                      className="w-full border rounded-lg px-3 py-2 focus:ring-blue-400 focus:border-blue-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-700 mb-1">
+                      Parent Category
+                    </label>
+                    <select
+                      value={editedCategory.parentCategory}
+                      onChange={(e) =>
+                        setEditedCategory((prev) => ({ ...prev, parentCategory: e.target.value }))
+                      }
+                      className="w-full border rounded-lg px-3 py-2 focus:ring-blue-400 focus:border-blue-400"
+                    >
+                      <option value="">No Parent</option>
+                      {categories
+                        .filter((c) => c._id !== editedCategory._id)
+                        .map((cat) => (
+                          <option key={cat._id} value={cat._id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Edit Images */}
+                <div>
+                  <label className="block text-sm font-medium text-blue-700 mb-2">
+                    Images
+                  </label>
+                  <div className="flex flex-wrap gap-3">
+                    <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition">
+                      <FontAwesomeIcon icon={faImages} />
+                      Upload
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => uploadImage(e, true)}
+                      />
+                    </label>
+                    {loading && <Loader />}
+                    {editedCategory.images.map((img, i) => (
+                      <div key={i} className="relative group">
+                        <img
+                          src={img.thumb || img.full}
+                          className="w-16 h-16 object-cover rounded-md border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(i, true)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1 opacity-0 group-hover:opacity-100 transition"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Edit Properties */}
+                <div>
+                  <label className="block text-sm font-medium text-blue-700 mb-2">
+                    Properties
+                  </label>
+                  {editedCategory.properties.map((prop, idx) => (
+                    <div key={idx} className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        placeholder="Property Name"
+                        value={prop.propName}
+                        onChange={(e) =>
+                          handlePropertyChange(idx, "propName", e.target.value, true)
+                        }
+                        className="flex-1 border rounded-lg px-3 py-2 text-sm"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Property Value"
+                        value={prop.propValue}
+                        onChange={(e) =>
+                          handlePropertyChange(idx, "propValue", e.target.value, true)
+                        }
+                        className="flex-1 border rounded-lg px-3 py-2 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeProperty(idx, true)}
+                        className="text-red-500 hover:text-red-700 px-2"
+                      >
+                        <FontAwesomeIcon icon={faTimes} />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addProperty(true)}
+                    className="text-sm text-blue-600 hover:text-blue-800 mt-1"
+                  >
+                    + Add Property
+                  </button>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleUpdateClick(editedCategory._id)}
+                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:opacity-90 transition flex items-center gap-2"
+                  >
+                    <FontAwesomeIcon icon={faSave} />
+                    Update Category
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditIndex(null);
+                      setEditedCategory({ name: "", parentCategory: "", images: [], properties: [] });
+                    }}
+                    className="px-6 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
+                  >
+                    <FontAwesomeIcon icon={faTimes} />
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Table Section */}
           <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4 overflow-x-auto">
             <table className="min-w-full text-sm text-left">
@@ -332,7 +481,7 @@ export default function Categories() {
               </thead>
               <tbody>
                 {filteredCategories.map((cat, i) => (
-                  <tr key={cat._id} className="border-b hover:bg-blue-50">
+                  <tr key={cat._id} className={`border-b hover:bg-blue-50 ${editIndex === i ? "bg-blue-50 ring-2 ring-blue-200" : ""}`}>
                     <td className="p-3">{cat.name}</td>
                     <td className="p-3">{cat.parent?.name || "-"}</td>
                     <td className="p-3 flex gap-2">

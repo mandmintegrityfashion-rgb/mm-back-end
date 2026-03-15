@@ -80,11 +80,11 @@ export default function PersonalTaxCalculator() {
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-10 px-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-screen-xl mx-auto">
           {/* Header */}
           <header className=" pl-4 mb-8">
             <h1 className="text-4xl font-extrabold text-blue-800 tracking-tight">
-              M&M Fashion – Personal Tax Calculator
+              M&M Fashion — Personal Tax Calculator
             </h1>
             <p className="text-gray-500 mt-1 max-w-2xl">
               Compute your personal income tax according to the Nigeria Finance Act. Perfect for M&M Fashion staff and partners.

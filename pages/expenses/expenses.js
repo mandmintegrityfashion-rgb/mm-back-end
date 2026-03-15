@@ -59,7 +59,7 @@ export default function ManageExpenses() {
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 ">
         <div className="max-w-screen-xl mx-auto">
-          <h1 className="text-3xl font-bold text-blue-800 mb-6">Expense Management</h1>
+          <h1 className="text-3xl font-bold text-blue-800 mb-6">M&M Fashion — Expense Management</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             {/* Left Panel: Add Expense */}

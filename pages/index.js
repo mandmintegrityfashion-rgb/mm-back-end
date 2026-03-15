@@ -2,7 +2,7 @@
 
 import Layout from "@/components/Layout";
 import { Bar, Line } from "react-chartjs-2";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import axios from "axios";
@@ -35,9 +35,49 @@ const fetcher = (url) => axios.get(url).then((res) => res.data);
 
 export default function Home() {
   const router = useRouter();
+  const [period, setPeriod] = useState("today");
 
-  // Fetch aggregated sales data (Option 1)
-  const { data: salesReport } = useSWR("/api/reports/sales", fetcher, {
+  const getDateRange = () => {
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    switch (period) {
+      case "today":
+        return `from=${today}&to=${today}`;
+      case "yesterday": {
+        const y = new Date(now);
+        y.setDate(y.getDate() - 1);
+        return `from=${y.toISOString().slice(0, 10)}&to=${y.toISOString().slice(0, 10)}`;
+      }
+      case "7days": {
+        const d = new Date(now);
+        d.setDate(d.getDate() - 7);
+        return `from=${d.toISOString().slice(0, 10)}&to=${today}`;
+      }
+      case "30days": {
+        const d = new Date(now);
+        d.setDate(d.getDate() - 30);
+        return `from=${d.toISOString().slice(0, 10)}&to=${today}`;
+      }
+      case "month": {
+        return `from=${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01&to=${today}`;
+      }
+      case "year":
+        return `from=${now.getFullYear()}-01-01&to=${today}`;
+      default:
+        return `from=${today}&to=${today}`;
+    }
+  };
+
+  const periodLabels = [
+    { label: "Today", value: "today" },
+    { label: "Yesterday", value: "yesterday" },
+    { label: "7 Days", value: "7days" },
+    { label: "30 Days", value: "30days" },
+    { label: "This Month", value: "month" },
+    { label: "This Year", value: "year" },
+  ];
+
+  const { data: salesReport } = useSWR(`/api/reports/sales?${getDateRange()}`, fetcher, {
     refreshInterval: 60000,
   });
 
@@ -130,7 +170,7 @@ export default function Home() {
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 text-blue-900">
-        <header className="flex flex-col sm:flex-row justify-between mb-10">
+        <header className="flex flex-col sm:flex-row justify-between mb-6">
           <h1 className="text-4xl font-bold">
             Welcome, {user.name || "Admin"}
           </h1>
@@ -150,6 +190,23 @@ export default function Home() {
           </div>
         </header>
 
+        {/* Period Filter */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {periodLabels.map((p) => (
+            <button
+              key={p.value}
+              onClick={() => setPeriod(p.value)}
+              className={`text-sm px-4 py-2 rounded-lg border transition-all ${
+                period === p.value
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-blue-700 border-blue-200 hover:bg-blue-50"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
         {/* KPIs */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <KpiCard
@@ -159,13 +216,14 @@ export default function Home() {
           />
           <KpiCard
             label="Transactions"
-            value={kpis.transactions}
+            value={kpis.transactions.toLocaleString()}
             changePercent={kpis.transactionsChangePercent}
           />
           <KpiCard
             label="Avg. Transaction"
             value={`₦${kpis.avgTransactionValue.toLocaleString(undefined, {
               minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
             })}`}
             changePercent={kpis.avgTransactionChangePercent}
           />

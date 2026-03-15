@@ -6,10 +6,13 @@ import User from "@/models/User";
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { username, email, pin } = req.body;
-  if (!username || !email || !pin) {
+  const { username: rawUsername, email, pin } = req.body;
+  if (!rawUsername || !email || !pin) {
     return res.status(400).json({ error: "Missing fields" });
   }
+
+  // Normalize username to CamelCase
+  const username = rawUsername.replace(/\b\w/g, (c) => c.toUpperCase());
 
   await mongoose.connect(process.env.MONGODB_URI);
 

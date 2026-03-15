@@ -27,23 +27,69 @@ export default function TaxAnalysisPage() {
   const [taxData, setTaxData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [period, setPeriod] = useState("year");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
+  const periodOptions = [
+    { label: "This Year", value: "year" },
+    { label: "This Quarter", value: "quarter" },
+    { label: "This Month", value: "month" },
+    { label: "Last 6 Months", value: "6months" },
+    { label: "Specific Year", value: "specific-year" },
+    { label: "Custom Range", value: "custom" },
+  ];
+
+  const fetchTaxData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const params = new URLSearchParams();
+      const now = new Date();
+
+      if (period === "year") {
+        params.set("from", `${now.getFullYear()}-01-01`);
+        params.set("to", now.toISOString().slice(0, 10));
+      } else if (period === "quarter") {
+        const qMonth = Math.floor(now.getMonth() / 3) * 3;
+        params.set("from", `${now.getFullYear()}-${String(qMonth + 1).padStart(2, "0")}-01`);
+        params.set("to", now.toISOString().slice(0, 10));
+      } else if (period === "month") {
+        params.set("from", `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`);
+        params.set("to", now.toISOString().slice(0, 10));
+      } else if (period === "6months") {
+        const sixAgo = new Date(now);
+        sixAgo.setMonth(sixAgo.getMonth() - 6);
+        params.set("from", sixAgo.toISOString().slice(0, 10));
+        params.set("to", now.toISOString().slice(0, 10));
+      } else if (period === "specific-year") {
+        params.set("from", `${selectedYear}-01-01`);
+        params.set("to", `${selectedYear}-12-31`);
+      } else if (period === "custom" && customFrom && customTo) {
+        params.set("from", customFrom);
+        params.set("to", customTo);
+      }
+
+      const res = await fetch(`/api/tax/summary?${params}`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const data = await res.json();
+      setTaxData(data);
+    } catch (err) {
+      console.error("Error fetching tax data:", err);
+      setError("Failed to load tax summary. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchTaxData() {
-      try {
-        const res = await fetch("/api/tax/summary");
-        if (!res.ok) throw new Error(`Server returned ${res.status}`);
-        const data = await res.json();
-        setTaxData(data);
-      } catch (err) {
-        console.error("❌ Error fetching tax data:", err);
-        setError("Failed to load tax summary. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchTaxData();
-  }, []);
+  }, [period, selectedYear, customFrom, customTo]);
 
   const handleDownload = () => {
     if (!taxData) return;
@@ -82,7 +128,7 @@ export default function TaxAnalysisPage() {
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-10 px-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-screen-xl mx-auto">
           <header className="mb-10 text-center">
             <h1 className="text-4xl font-bold text-blue-800">
               M&M Fashion — Tax Dashboard
@@ -91,6 +137,62 @@ export default function TaxAnalysisPage() {
               Financial overview & compliance summary under the Nigeria Finance Act
             </p>
           </header>
+
+          {/* Period Filter */}
+          <div className="bg-white rounded-2xl shadow-sm border border-blue-100 px-6 py-4 mb-10">
+            <div className="flex flex-wrap items-center gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Period</label>
+                <select
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value)}
+                  className="border border-blue-200 px-3 py-1.5 rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
+                >
+                  {periodOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {period === "specific-year" && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Year</label>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                    className="border border-blue-200 px-3 py-1.5 rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
+                  >
+                    {years.map((y) => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {period === "custom" && (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">From</label>
+                    <input
+                      type="date"
+                      value={customFrom}
+                      onChange={(e) => setCustomFrom(e.target.value)}
+                      className="border border-blue-200 px-3 py-1.5 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">To</label>
+                    <input
+                      type="date"
+                      value={customTo}
+                      onChange={(e) => setCustomTo(e.target.value)}
+                      className="border border-blue-200 px-3 py-1.5 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
 
           {loading ? (
             <p className="text-gray-500 text-center">Loading tax data...</p>
@@ -130,11 +232,11 @@ export default function TaxAnalysisPage() {
 
               {/* === Details === */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-                <DetailBox label="Total Revenue" value={`₦${taxData.totalRevenue.toLocaleString()}`} />
-                <DetailBox label="COGS" value={`₦${taxData.cogs.toLocaleString()}`} />
-                <DetailBox label="Operating Expenses" value={`₦${taxData.operatingExpenses.toLocaleString()}`} />
-                <DetailBox label="Gross Profit" value={`₦${taxData.grossProfit.toLocaleString()}`} />
-                <DetailBox label="Taxable Income" value={`₦${taxData.taxableIncome.toLocaleString()}`} />
+                <DetailBox label="Total Revenue" value={`₦${Number(taxData.totalRevenue || 0).toLocaleString()}`} />
+                <DetailBox label="COGS" value={`₦${Number(taxData.cogs || 0).toLocaleString()}`} />
+                <DetailBox label="Operating Expenses" value={`₦${Number(taxData.operatingExpenses || 0).toLocaleString()}`} />
+                <DetailBox label="Gross Profit" value={`₦${Number(taxData.grossProfit || 0).toLocaleString()}`} />
+                <DetailBox label="Taxable Income" value={`₦${Number(taxData.taxableIncome || 0).toLocaleString()}`} />
                 <DetailBox
                   label="Generated On"
                   value={new Date(taxData.generatedAt).toLocaleString()}
@@ -173,8 +275,8 @@ export default function TaxAnalysisPage() {
                         {taxData.breakdown.map((item, idx) => (
                           <tr key={idx} className="border-b hover:bg-blue-50 transition">
                             <td className="py-2 px-4 font-medium text-gray-700">{item.month}</td>
-                            <td className="py-2 px-4 text-gray-600">{item.income.toLocaleString()}</td>
-                            <td className="py-2 px-4 text-gray-600">{item.vat.toLocaleString()}</td>
+                            <td className="py-2 px-4 text-gray-600">₦{Number(item.income || 0).toLocaleString()}</td>
+                            <td className="py-2 px-4 text-gray-600">₦{Number(item.vat || 0).toLocaleString()}</td>
                           </tr>
                         ))}
                       </tbody>

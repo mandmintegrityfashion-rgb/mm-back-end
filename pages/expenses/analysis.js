@@ -103,11 +103,12 @@ export default function ExpenseAnalysis() {
 
   return (
     <Layout>
-      <div className="max-w-7xl bg-gradient-to-b from-blue-50 to-white mx-auto px-6 py-10 space-y-10 text-gray-800">
+      <div className="bg-gradient-to-b from-blue-50 to-white mx-auto px-6 py-10 space-y-10 text-gray-800">
         {/* Header */}
+        <div className="max-w-screen-xl mx-auto space-y-10">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-blue-800 tracking-tight">
-            M&M Fashion Expense Analysis
+            M&M Fashion — Expense Analysis
           </h1>
           <p className="text-gray-500 text-lg">
             Track, visualize, and manage all your fashion business expenses.
@@ -345,6 +346,7 @@ export default function ExpenseAnalysis() {
             </div>
           </>
         )}
+        </div>
       </div>
     </Layout>
   );

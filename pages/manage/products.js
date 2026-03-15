@@ -235,7 +235,7 @@ export default function Products() {
       <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen rounded-2xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-blue-800">Products</h1>
+          <h1 className="text-2xl font-bold text-blue-800">M&M Fashion — Products</h1>
 
           {/* When linking to product creation, set highlight to newly created product if you want.
               For edit page navigation, we store highlight in sessionStorage below via onClick handler. */}

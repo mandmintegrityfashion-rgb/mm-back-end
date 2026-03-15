@@ -36,52 +36,79 @@ export default function Reporting() {
   const [selectedLocation, setSelectedLocation] = useState("All");
   const [selectedDays, setSelectedDays] = useState(14);
   const [granularity, setGranularity] = useState("Day");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [quickRange, setQuickRange] = useState("14");
 
-  // ✅ Update selectedDays when granularity changes
-  const handleGranularityChange = (period) => {
-    setGranularity(period);
-    switch (period) {
-      case "Month":
-        setSelectedDays(180);
-        break;
-      case "Week":
-        setSelectedDays(90);
-        break;
-      case "Day":
-        setSelectedDays(30);
-        break;
-      case "Hourly":
-        setSelectedDays(2);
-        break;
+  const quickRanges = [
+    { label: "Today", value: "1" },
+    { label: "7 Days", value: "7" },
+    { label: "14 Days", value: "14" },
+    { label: "30 Days", value: "30" },
+    { label: "90 Days", value: "90" },
+    { label: "6 Months", value: "180" },
+    { label: "1 Year", value: "365" },
+    { label: "Custom", value: "custom" },
+  ];
+
+  const handleQuickRange = (val) => {
+    setQuickRange(val);
+    if (val !== "custom") {
+      setSelectedDays(Number(val));
+      setDateFrom("");
+      setDateTo("");
     }
   };
 
-  // ✅ Fetch function (with cache)
+  const handleGranularityChange = (period) => {
+    setGranularity(period);
+    if (quickRange !== "custom") {
+      switch (period) {
+        case "Month":
+          setSelectedDays(180);
+          setQuickRange("180");
+          break;
+        case "Week":
+          setSelectedDays(90);
+          setQuickRange("90");
+          break;
+        case "Day":
+          setSelectedDays(30);
+          setQuickRange("30");
+          break;
+        case "Hourly":
+          setSelectedDays(2);
+          setQuickRange("custom");
+          break;
+      }
+    }
+  };
+
   async function fetchReportData(forceRefresh = false) {
     try {
       setLoading(true);
 
-      const cacheKey = `report_cache_${selectedLocation}_${selectedDays}_${granularity}`;
+      const cacheKey = `report_cache_${selectedLocation}_${selectedDays}_${granularity}_${dateFrom}_${dateTo}`;
       const cached = JSON.parse(localStorage.getItem(cacheKey));
       const lastFetched = localStorage.getItem(`${cacheKey}_time`);
       const cacheValid = cached && lastFetched && Date.now() - lastFetched < 12 * 60 * 60 * 1000;
 
-      // Use cached data if valid and not forcing refresh
       if (cacheValid && !forceRefresh) {
         setReport(cached);
         setLoading(false);
-
-        // Background refresh to keep data fresh
         setTimeout(() => fetchReportData(true), 100);
         return;
       }
 
-      // Fetch fresh data
-      const query = new URLSearchParams({
+      const params = {
         location: selectedLocation,
         days: selectedDays,
         period: granularity,
-      });
+      };
+      if (dateFrom) params.from = dateFrom;
+      if (dateTo) params.to = dateTo;
+
+      const query = new URLSearchParams(params);
       const res = await fetch(`/api/reports/reporting-data?${query}`);
       const data = await res.json();
 
@@ -97,10 +124,9 @@ export default function Reporting() {
     }
   }
 
-  // ✅ Initial + dependency-based load
   useEffect(() => {
     fetchReportData();
-  }, [selectedLocation, selectedDays, granularity]);
+  }, [selectedLocation, selectedDays, granularity, dateFrom, dateTo]);
 
   if (loading && !report) {
     return (
@@ -199,7 +225,8 @@ export default function Reporting() {
 
   return (
     <Layout title="Reporting">
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 md:p-10 space-y-10 transition-all duration-300">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 md:p-10 transition-all duration-300">
+        <div className="max-w-screen-xl mx-auto space-y-10">
         {/* Header */}
         <header>
           <h1 className="text-4xl font-extrabold text-blue-900 mb-2">
@@ -211,41 +238,75 @@ export default function Reporting() {
         </header>
 
         {/* Filter Bar */}
-        <div className="flex flex-wrap items-center gap-4 bg-white rounded-2xl shadow-md px-6 py-4 border border-blue-100">
-          <label className="font-medium text-gray-600">Location:</label>
-          <select
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-            className="border border-blue-200 px-3 py-1.5 rounded-md focus:ring-2 focus:ring-blue-400"
-          >
-            {["All", ...Object.keys(salesByLocation || {})].map((loc) => (
-              <option key={loc}>{loc}</option>
-            ))}
-          </select>
-
-          <label className="font-medium text-gray-600 ml-2">Last:</label>
-          <input
-            type="number"
-            value={selectedDays}
-            onChange={(e) => setSelectedDays(Number(e.target.value))}
-            className="border border-blue-200 px-2 w-20 rounded-md text-center"
-          />
-          <span className="text-gray-600">days</span>
-
-          <div className="ml-auto flex gap-2">
-            {["Month", "Week", "Day", "Hourly"].map((period) => (
-              <button
-                key={period}
-                onClick={() => handleGranularityChange(period)}
-                className={`text-sm px-3 py-1.5 rounded-md border transition-all duration-200 ${
-                  granularity === period
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "text-blue-600 border-blue-300 hover:bg-blue-50"
-                }`}
+        <div className="bg-white rounded-2xl shadow-md px-6 py-5 border border-blue-100 space-y-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Location</label>
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="border border-blue-200 px-3 py-1.5 rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
               >
-                {period}
-              </button>
-            ))}
+                {["All", ...Object.keys(salesByLocation || {})].map((loc) => (
+                  <option key={loc}>{loc}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Period</label>
+              <select
+                value={quickRange}
+                onChange={(e) => handleQuickRange(e.target.value)}
+                className="border border-blue-200 px-3 py-1.5 rounded-md focus:ring-2 focus:ring-blue-400 text-sm"
+              >
+                {quickRanges.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {quickRange === "custom" && (
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">From</label>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="border border-blue-200 px-3 py-1.5 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">To</label>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="border border-blue-200 px-3 py-1.5 rounded-md text-sm focus:ring-2 focus:ring-blue-400"
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="ml-auto">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Granularity</label>
+              <div className="flex gap-2">
+                {["Month", "Week", "Day", "Hourly"].map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => handleGranularityChange(period)}
+                    className={`text-sm px-3 py-1.5 rounded-md border transition-all duration-200 ${
+                      granularity === period
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "text-blue-600 border-blue-300 hover:bg-blue-50"
+                    }`}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -271,18 +332,19 @@ export default function Reporting() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <Card title="Total Sales" value={`₦${summary.totalSales?.toLocaleString()}`} />
-          <Card title="Transactions" value={summary.totalTransactions || 0} />
-          <Card title="Gross Margin" value={`₦${stockMargin?.toLocaleString() || 0}`} />
+          <Card title="Total Sales" value={`₦${(summary.totalSales || 0).toLocaleString()}`} />
+          <Card title="Transactions" value={(summary.totalTransactions || 0).toLocaleString()} />
+          <Card title="Gross Margin" value={`₦${(stockMargin || 0).toLocaleString()}`} />
           <Card
             title="Average Txn"
             value={`₦${averageTransaction.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}`}
           />
-          <Card title="Operating Margin" value={`${summary.operatingMargin?.toFixed(2) || 0}%`} />
-          <Card title="Low Stock Items" value={summary.lowStockItems || 0} />
-          <Card title="Total Cost" value={`₦${summary.totalCost?.toLocaleString() || 0}`} />
+          <Card title="Operating Margin" value={`${(summary.operatingMargin || 0).toFixed(2)}%`} />
+          <Card title="Low Stock Items" value={(summary.lowStockItems || 0).toLocaleString()} />
+          <Card title="Total Cost" value={`₦${(summary.totalCost || 0).toLocaleString()}`} />
         </div>
 
         {/* Charts Grid */}
@@ -310,6 +372,7 @@ export default function Reporting() {
               }}
             />
           </ChartCard>
+        </div>
         </div>
       </div>
     </Layout>

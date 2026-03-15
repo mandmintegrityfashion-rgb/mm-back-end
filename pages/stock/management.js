@@ -50,10 +50,10 @@ export default function StockManagement() {
 
         {/* Stats */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <StatCard label="Total Stock" value={`${totalStock} units`} />
-          <StatCard label="Incoming Stock" value={`${totalIncoming} units`} />
-          <StatCard label="Outgoing Stock" value={`${totalOutgoing} units`} />
-          <StatCard label="Low Stock Alerts" value={lowStockCount} highlight />
+          <StatCard label="Total Stock" value={`${totalStock.toLocaleString()} units`} />
+          <StatCard label="Incoming Stock" value={`${totalIncoming.toLocaleString()} units`} />
+          <StatCard label="Outgoing Stock" value={`${totalOutgoing.toLocaleString()} units`} />
+          <StatCard label="Low Stock Alerts" value={lowStockCount.toLocaleString()} highlight />
         </section>
 
         {/* Search */}

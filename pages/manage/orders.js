@@ -56,6 +56,11 @@ export default function OrderInventoryPage() {
   const handleStatusChange = (orderId, newStatus) => {
     const order = orders.find((o) => o._id === orderId);
     setSelectedOrder({ ...order, nextStatus: newStatus });
+    // Auto-fill delivery person info from previous Shipped data if switching to Delivered
+    if (newStatus === "Delivered" && order.deliveryPerson) {
+      if (order.deliveryPerson.name && !deliveryPersonName) setDeliveryPersonName(order.deliveryPerson.name);
+      if (order.deliveryPerson.phone && !deliveryPersonPhone) setDeliveryPersonPhone(order.deliveryPerson.phone);
+    }
   };
 
   const updateStatus = async (orderId, newStatus) => {
@@ -113,10 +118,24 @@ export default function OrderInventoryPage() {
       // Update backend status after email is sent
       await updateStatus(selectedOrder._id, status);
 
+      // Store delivery person info on the local order for auto-fill
+      if (status === "Shipped" || status === "Delivered") {
+        setOrders((prev) =>
+          prev.map((order) =>
+            order._id === selectedOrder._id
+              ? { ...order, status, deliveryPerson: { name: deliveryPersonName, phone: deliveryPersonPhone } }
+              : order
+          )
+        );
+      }
+
       alert(`${status} confirmation email sent successfully!`);
       setSelectedOrder(null);
-      setDeliveryPersonName("");
-      setDeliveryPersonPhone("");
+      // Don't clear delivery person fields so they auto-fill for Delivered
+      if (status === "Delivered") {
+        setDeliveryPersonName("");
+        setDeliveryPersonPhone("");
+      }
     } catch (error) {
       console.error("Failed to send email:", error);
       alert(`Failed to send ${status} confirmation email.`);
@@ -128,7 +147,7 @@ export default function OrderInventoryPage() {
   return (
     <Layout>
       <div className="px-6 py-8 bg-gradient-to-b from-blue-50 to-white ">
-        <h1 className="text-3xl font-[Playfair_Display] font-semibold text-blue-800 mb-6">Order Inventory</h1>
+        <h1 className="text-3xl font-bold text-blue-800 mb-6">M&M Fashion — Order Inventory</h1>
 
         <div className="mb-6 relative max-w-md">
           <Search className="absolute left-3 top-3.5 text-blue-400 w-5 h-5" />

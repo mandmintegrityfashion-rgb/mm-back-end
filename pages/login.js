@@ -20,11 +20,80 @@ export default function Login() {
   const [pin, setPin] = useState("");
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isForgotPin, setIsForgotPin] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1); // 1: enter email, 2: enter code + new pin
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [newPin, setNewPin] = useState("");
   const router = useRouter();
 
-  const handleNumberClick = (num) => setPin((prev) => prev + num);
-  const handleDelete = () => setPin((prev) => prev.slice(0, -1));
-  const handleClear = () => setPin("");
+  const handleNumberClick = (num) => {
+    if (isForgotPin && forgotStep === 2) {
+      setNewPin((prev) => prev + num);
+    } else {
+      setPin((prev) => prev + num);
+    }
+  };
+  const handleDelete = () => {
+    if (isForgotPin && forgotStep === 2) {
+      setNewPin((prev) => prev.slice(0, -1));
+    } else {
+      setPin((prev) => prev.slice(0, -1));
+    }
+  };
+  const handleClear = () => {
+    if (isForgotPin && forgotStep === 2) {
+      setNewPin("");
+    } else {
+      setPin("");
+    }
+  };
+
+  const toCamelCase = (str) =>
+    str.replace(/\b\w/g, (char) => char.toUpperCase());
+
+  const handleUsernameChange = (e) => {
+    setUsername(toCamelCase(e.target.value));
+  };
+
+  const handleForgotSubmit = async () => {
+    setLoading(true);
+    try {
+      if (forgotStep === 1) {
+        const res = await fetch("/api/auth/forgot-pin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert("Reset code sent to your email!");
+          setForgotStep(2);
+        } else {
+          alert(data.error || "Failed to send reset code.");
+        }
+      } else {
+        const res = await fetch("/api/auth/reset-pin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail, resetCode, newPin }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert("PIN reset successful! Please log in with your new PIN.");
+          setIsForgotPin(false);
+          setForgotStep(1);
+          setForgotEmail("");
+          setResetCode("");
+          setNewPin("");
+        } else {
+          alert(data.error || "Failed to reset PIN.");
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,21 +165,119 @@ export default function Login() {
           <h2
             className={`${playfair.className} text-4xl font-bold text-center text-[#0a1e40] mb-3`}
           >
-            {isRegister ? "Create an Account" : "Welcome Back"}
+            {isForgotPin
+              ? "Reset Your PIN"
+              : isRegister
+              ? "Create an Account"
+              : "Welcome Back"}
           </h2>
           <p className="text-center text-gray-500 mb-10">
-            {isRegister
+            {isForgotPin
+              ? forgotStep === 1
+                ? "Enter your registered email to receive a reset code."
+                : "Enter the code from your email and set a new PIN."
+              : isRegister
               ? "Join M&M Fashion and discover timeless designs."
               : "Log in to continue your style journey."}
           </p>
 
+          {isForgotPin ? (
+            <div className="space-y-5">
+              {forgotStep === 1 ? (
+                <>
+                  <input
+                    type="email"
+                    placeholder="Registered Email Address"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    className={`w-full px-4 py-3 rounded-xl border border-gray-300 text-center ${inter.className} text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm bg-white/90`}
+                  />
+                  <button
+                    onClick={handleForgotSubmit}
+                    disabled={loading || !forgotEmail}
+                    className={`w-full py-3 px-4 rounded-xl font-semibold shadow-lg text-white transition-all ${
+                      loading || !forgotEmail
+                        ? "bg-blue-300 cursor-not-allowed"
+                        : "bg-[#2563eb] hover:bg-[#1e40af]"
+                    }`}
+                  >
+                    {loading ? "Sending..." : "Send Reset Code"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    placeholder="6-digit Reset Code"
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    className={`w-full px-4 py-3 rounded-xl border border-gray-300 text-center tracking-[0.4em] ${inter.className} text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm bg-white/90`}
+                  />
+                  <input
+                    type="password"
+                    placeholder="New PIN"
+                    value={newPin}
+                    readOnly
+                    className={`w-full px-4 py-3 rounded-xl border border-gray-300 text-center tracking-[0.6em] ${inter.className} text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm bg-white/90`}
+                  />
+
+                  {/* Number keypad */}
+                  <div className="grid grid-cols-3 gap-3 w-full">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, "Clear", 0, "Del"].map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => {
+                          if (item === "Del") handleDelete();
+                          else if (item === "Clear") handleClear();
+                          else handleNumberClick(item);
+                        }}
+                        className="bg-gradient-to-b from-blue-50 to-white border border-blue-100 text-[#0a1e40] py-4 rounded-xl text-lg font-semibold hover:from-blue-600 hover:to-blue-500 hover:text-white active:scale-90 active:shadow-inner active:from-blue-700 active:to-blue-600 active:text-white transition-all duration-150 shadow-sm select-none"
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={handleForgotSubmit}
+                    disabled={loading || !resetCode || !newPin}
+                    className={`w-full py-3 px-4 rounded-xl font-semibold shadow-lg text-white transition-all ${
+                      loading || !resetCode || !newPin
+                        ? "bg-blue-300 cursor-not-allowed"
+                        : "bg-[#2563eb] hover:bg-[#1e40af]"
+                    }`}
+                  >
+                    {loading ? "Resetting..." : "Reset PIN"}
+                  </button>
+                </>
+              )}
+
+              <p className="mt-4 text-center text-gray-700">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPin(false);
+                    setForgotStep(1);
+                    setForgotEmail("");
+                    setResetCode("");
+                    setNewPin("");
+                  }}
+                  className="text-blue-700 font-semibold hover:underline"
+                >
+                  Back to Login
+                </button>
+              </p>
+            </div>
+          ) : (
+          <>
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username */}
             <input
               type="text"
               placeholder="Username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleUsernameChange}
               className={`w-full px-4 py-3 rounded-xl border border-gray-300 text-center ${inter.className} text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm bg-white/90`}
             />
 
@@ -145,7 +312,7 @@ export default function Login() {
                     else if (item === "Clear") handleClear();
                     else handleNumberClick(item);
                   }}
-                  className="bg-gradient-to-b from-blue-50 to-white border border-blue-100 text-[#0a1e40] py-4 rounded-xl text-lg font-semibold hover:from-blue-600 hover:to-blue-500 hover:text-white transition-all shadow-sm"
+                  className="bg-gradient-to-b from-blue-50 to-white border border-blue-100 text-[#0a1e40] py-4 rounded-xl text-lg font-semibold hover:from-blue-600 hover:to-blue-500 hover:text-white active:scale-90 active:shadow-inner active:from-blue-700 active:to-blue-600 active:text-white transition-all duration-150 shadow-sm select-none"
                 >
                   {item}
                 </button>
@@ -172,11 +339,28 @@ export default function Login() {
             </button>
           </form>
 
+          {/* Forgot PIN link */}
+          {!isRegister && (
+            <p className="mt-3 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsForgotPin(true);
+                  setForgotStep(1);
+                  setPin("");
+                }}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Forgot PIN?
+              </button>
+            </p>
+          )}
+
           {/* Switch link */}
           <p className="mt-8 text-center text-gray-700">
             {isRegister
               ? "Already have an account?"
-              : "Don’t have an account?"}{" "}
+              : "Don't have an account?"}{" "}
             <button
               type="button"
               disabled={loading}
@@ -186,6 +370,8 @@ export default function Login() {
               {isRegister ? "Login" : "Register"}
             </button>
           </p>
+          </>
+          )}
         </div>
       </div>
     </div>
