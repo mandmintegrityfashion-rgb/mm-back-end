@@ -129,7 +129,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 p-6 text-blue-900">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 text-blue-900">
         <header className="flex flex-col sm:flex-row justify-between mb-10">
           <h1 className="text-4xl font-bold">
             Welcome, {user.name || "Admin"}

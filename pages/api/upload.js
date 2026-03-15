@@ -3,7 +3,7 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { mongooseConnect } from "@/lib/mongoose";
 
-const S3BucketName = "image-bucket-admin";
+const S3BucketName = "mm-fashion-store";
 
 export default async function ImageHandler(req, res) {
   try {
@@ -15,7 +15,7 @@ export default async function ImageHandler(req, res) {
     });
 
     const client = new S3Client({
-      region: "eu-west-2",
+      region: "eu-north-1",
       credentials: {
         accessKeyId: process.env.S3_ACCESS_KEY,
         secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,

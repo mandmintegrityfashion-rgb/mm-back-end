@@ -9,7 +9,7 @@ import {
   faCaretRight,
   faCoins,
 } from "@fortawesome/free-solid-svg-icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -18,10 +18,23 @@ export default function Nav({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { pathname } = router;
+  const sidebarRef = useRef(null);
 
   const toggleMenu = (menu) => setOpenMenu(openMenu === menu ? null : menu);
   const closeMenu = () => setOpenMenu(null);
 
+  // ✅ Detect outside click to close submenu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setOpenMenu(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // ✅ Show loading spinner when navigating
   useEffect(() => {
     const handleStart = () => setLoading(true);
     const handleStop = () => setLoading(false);
@@ -90,6 +103,7 @@ export default function Nav({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <aside
+        ref={sidebarRef} // ✅ Reference to detect outside clicks
         className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white border-r border-blue-100 shadow-sm z-20 transform transition-transform duration-300 sm:translate-x-0 w-20 ${
           isOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
         }`}

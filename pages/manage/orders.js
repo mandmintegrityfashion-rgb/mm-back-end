@@ -127,7 +127,7 @@ export default function OrderInventoryPage() {
 
   return (
     <Layout>
-      <div className="px-6 py-8">
+      <div className="px-6 py-8 bg-gradient-to-b from-blue-50 to-white ">
         <h1 className="text-3xl font-[Playfair_Display] font-semibold text-blue-800 mb-6">Order Inventory</h1>
 
         <div className="mb-6 relative max-w-md">

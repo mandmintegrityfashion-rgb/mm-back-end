@@ -57,7 +57,7 @@ export default function ManageExpenses() {
 
   return (
     <Layout>
-      <div className="min-h-screen p-6 bg-gray-100">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 ">
         <div className="max-w-screen-xl mx-auto">
           <h1 className="text-3xl font-bold text-blue-800 mb-6">Expense Management</h1>
 

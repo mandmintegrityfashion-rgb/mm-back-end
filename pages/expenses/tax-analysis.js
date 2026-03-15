@@ -1,145 +1,193 @@
+"use client";
+
 import Layout from "@/components/Layout";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faScaleBalanced,
   faMoneyBillWave,
   faFileDownload,
   faChartLine,
+  faCircleInfo,
 } from "@fortawesome/free-solid-svg-icons";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-const getTaxBand = (revenue) => {
-  if (revenue <= 25_000_000) return { band: "Small", rate: 0 };
-  if (revenue <= 100_000_000) return { band: "Medium", rate: 20 };
-  return { band: "Large", rate: 30 };
-};
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 export default function TaxAnalysisPage() {
   const [taxData, setTaxData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const mockRevenue = 78_500_000;
-    const taxBandInfo = getTaxBand(mockRevenue);
-    const vatRate = 7.5;
-
-    const taxableIncome = mockRevenue * 0.85;
-    const companyIncomeTax = (taxableIncome * taxBandInfo.rate) / 100;
-    const vatOnSales = (mockRevenue * vatRate) / 100;
-
-    setTaxData({
-      totalRevenue: mockRevenue,
-      band: taxBandInfo.band,
-      citRate: taxBandInfo.rate,
-      taxableIncome,
-      companyIncomeTax,
-      vatOnSales,
-      breakdown: [
-        { month: "January", income: 8000000, vat: 600000 },
-        { month: "February", income: 5200000, vat: 390000 },
-        { month: "March", income: 4500000, vat: 337500 },
-      ],
-    });
+    async function fetchTaxData() {
+      try {
+        const res = await fetch("/api/tax/summary");
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        const data = await res.json();
+        setTaxData(data);
+      } catch (err) {
+        console.error("❌ Error fetching tax data:", err);
+        setError("Failed to load tax summary. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTaxData();
   }, []);
+
+  const handleDownload = () => {
+    if (!taxData) return;
+    const blob = new Blob([JSON.stringify(taxData, null, 2)], {
+      type: "application/json",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `tax-report-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+  };
+
+  const vatChartData = useMemo(() => {
+    if (!taxData?.breakdown) return null;
+    return {
+      labels: taxData.breakdown.map((b) => b.month),
+      datasets: [
+        {
+          label: "Income (₦)",
+          data: taxData.breakdown.map((b) => b.income),
+          borderColor: "#1E40AF",
+          backgroundColor: "rgba(59,130,246,0.2)",
+          tension: 0.3,
+        },
+        {
+          label: "VAT (₦)",
+          data: taxData.breakdown.map((b) => b.vat),
+          borderColor: "#16A34A",
+          backgroundColor: "rgba(34,197,94,0.2)",
+          tension: 0.3,
+        },
+      ],
+    };
+  }, [taxData]);
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 py-10 px-6">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-10 px-6">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <header className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-blue-800 tracking-tight">
-              M&M Fashion Tax Dashboard
+          <header className="mb-10 text-center">
+            <h1 className="text-4xl font-bold text-blue-800">
+              M&M Fashion — Tax Dashboard
             </h1>
             <p className="text-gray-500 mt-2">
-              Financial overview & compliance summary under Nigeria Finance Act
+              Financial overview & compliance summary under the Nigeria Finance Act
             </p>
           </header>
 
-          {!taxData ? (
+          {loading ? (
             <p className="text-gray-500 text-center">Loading tax data...</p>
+          ) : error ? (
+            <p className="text-red-500 text-center">{error}</p>
+          ) : !taxData ? (
+            <p className="text-gray-500 text-center">No tax data available.</p>
           ) : (
             <>
-              {/* Stat Overview */}
+              {/* === Summary Boxes === */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 mb-10">
                 <StatBox
                   icon={faScaleBalanced}
                   label="Revenue Band"
-                  value={taxData.band}
+                  value={taxData.band || "—"}
                   color="from-blue-100 to-blue-200"
                 />
                 <StatBox
                   icon={faChartLine}
                   label="CIT Rate"
-                  value={`${taxData.citRate}%`}
+                  value={`${taxData.citRate ?? 0}%`}
                   color="from-sky-100 to-sky-200"
                 />
                 <StatBox
                   icon={faMoneyBillWave}
                   label="VAT on Sales"
-                  value={`₦${taxData.vatOnSales.toLocaleString()}`}
+                  value={`₦${(taxData.vatOnSales || 0).toLocaleString()}`}
                   color="from-indigo-100 to-indigo-200"
                 />
                 <StatBox
                   icon={faMoneyBillWave}
                   label="CIT Payable"
-                  value={`₦${taxData.companyIncomeTax.toLocaleString()}`}
+                  value={`₦${(taxData.companyIncomeTax || 0).toLocaleString()}`}
                   color="from-blue-100 to-blue-200"
                 />
               </div>
 
-              {/* Summary Section */}
+              {/* === Details === */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+                <DetailBox label="Total Revenue" value={`₦${taxData.totalRevenue.toLocaleString()}`} />
+                <DetailBox label="COGS" value={`₦${taxData.cogs.toLocaleString()}`} />
+                <DetailBox label="Operating Expenses" value={`₦${taxData.operatingExpenses.toLocaleString()}`} />
+                <DetailBox label="Gross Profit" value={`₦${taxData.grossProfit.toLocaleString()}`} />
+                <DetailBox label="Taxable Income" value={`₦${taxData.taxableIncome.toLocaleString()}`} />
                 <DetailBox
-                  label="Total Revenue"
-                  value={`₦${taxData.totalRevenue.toLocaleString()}`}
-                />
-                <DetailBox
-                  label="Estimated Taxable Income"
-                  value={`₦${taxData.taxableIncome.toLocaleString()}`}
+                  label="Generated On"
+                  value={new Date(taxData.generatedAt).toLocaleString()}
                 />
               </div>
 
-              {/* Breakdown Table */}
-              <div className="bg-white/70 backdrop-blur-lg border border-blue-100 rounded-2xl shadow-sm p-6 mb-10">
-                <h2 className="text-2xl font-semibold mb-4 text-blue-800">
-                  Monthly VAT Breakdown
-                </h2>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm text-left">
-                    <thead>
-                      <tr className="bg-blue-100 text-blue-800 uppercase text-xs tracking-wider">
-                        <th className="py-2 px-4 rounded-l-lg">Month</th>
-                        <th className="py-2 px-4">Income (₦)</th>
-                        <th className="py-2 px-4 rounded-r-lg">VAT (₦)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {taxData.breakdown.map((item, index) => (
-                        <tr
-                          key={index}
-                          className="border-b border-blue-50 hover:bg-blue-50 transition"
-                        >
-                          <td className="py-2 px-4 font-medium text-gray-700">
-                            {item.month}
-                          </td>
-                          <td className="py-2 px-4 text-gray-600">
-                            {item.income.toLocaleString()}
-                          </td>
-                          <td className="py-2 px-4 text-gray-600">
-                            {item.vat.toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {/* === Chart === */}
+              {vatChartData && (
+                <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl border border-blue-100 shadow-sm mb-10">
+                  <div className="flex items-center gap-2 mb-4">
+                    <FontAwesomeIcon icon={faCircleInfo} className="text-blue-700" />
+                    <h2 className="text-xl font-semibold text-blue-800">
+                      Monthly Income & VAT Trend
+                    </h2>
+                  </div>
+                  <Line data={vatChartData} options={{ responsive: true, plugins: { legend: { position: "bottom" } } }} />
                 </div>
-              </div>
+              )}
 
-              {/* Download Button */}
+              {/* === Table === */}
+              {Array.isArray(taxData.breakdown) && taxData.breakdown.length > 0 && (
+                <div className="bg-white/80 border border-blue-100 rounded-2xl shadow p-6 mb-10">
+                  <h2 className="text-2xl font-semibold mb-4 text-blue-800">
+                    VAT Breakdown by Month
+                  </h2>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm text-left">
+                      <thead>
+                        <tr className="bg-blue-100 text-blue-800 uppercase text-xs tracking-wider">
+                          <th className="py-2 px-4">Month</th>
+                          <th className="py-2 px-4">Income (₦)</th>
+                          <th className="py-2 px-4">VAT (₦)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {taxData.breakdown.map((item, idx) => (
+                          <tr key={idx} className="border-b hover:bg-blue-50 transition">
+                            <td className="py-2 px-4 font-medium text-gray-700">{item.month}</td>
+                            <td className="py-2 px-4 text-gray-600">{item.income.toLocaleString()}</td>
+                            <td className="py-2 px-4 text-gray-600">{item.vat.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* === Download Button === */}
               <div className="flex justify-end">
                 <button
-                  onClick={() => alert('Tax Report downloaded')}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-md transition"
+                  onClick={handleDownload}
+                  className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl shadow-md transition"
                 >
                   <FontAwesomeIcon icon={faFileDownload} />
                   Download Tax Report
@@ -153,6 +201,7 @@ export default function TaxAnalysisPage() {
   );
 }
 
+/* === Subcomponents === */
 function StatBox({ icon, label, value, color }) {
   return (
     <div

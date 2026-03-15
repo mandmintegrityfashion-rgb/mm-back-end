@@ -265,7 +265,7 @@ export default function HeroSetup() {
                         </p>
                         <div className="mt-4">
                           <a
-                            href={currentHero.ctaLink}
+                            href="#"
                             className="px-8 py-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow-lg hover:from-blue-600 hover:to-blue-800 transition-all"
                           >
                             {currentHero.ctaText}

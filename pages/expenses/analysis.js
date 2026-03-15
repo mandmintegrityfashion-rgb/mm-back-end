@@ -103,7 +103,7 @@ export default function ExpenseAnalysis() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-6 py-10 space-y-10 text-gray-800">
+      <div className="max-w-7xl bg-gradient-to-b from-blue-50 to-white mx-auto px-6 py-10 space-y-10 text-gray-800">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-blue-800 tracking-tight">

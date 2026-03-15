@@ -147,7 +147,7 @@ export default function SalesReport() {
 
   return (
     <Layout title="M&M Fashion Sales Report">
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 p-6 text-blue-900 font-sans transition-all duration-300">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 text-blue-900 font-sans transition-all duration-300">
         <header className="mb-10 text-start pt-4">
           <h1 className="text-4xl font-extrabold text-blue-900 mb-2 tracking-tight">
             M&M Fashion – Sales Report
