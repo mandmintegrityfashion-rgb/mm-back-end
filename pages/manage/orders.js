@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, X, Mail } from "lucide-react";
+import { Search, X } from "lucide-react";
 import clsx from "clsx";
 import Layout from "@/components/Layout";
 import axios from "axios";
@@ -146,8 +146,9 @@ export default function OrderInventoryPage() {
 
   return (
     <Layout>
-      <div className="px-6 py-8 bg-gradient-to-b from-blue-50 to-white ">
-        <h1 className="text-3xl font-bold text-blue-800 mb-6">M&M Fashion — Order Inventory</h1>
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-6">
+        <h1 className="text-3xl font-bold text-blue-800">M&M Fashion — Order Inventory</h1>
 
         <div className="mb-6 relative max-w-md">
           <Search className="absolute left-3 top-3.5 text-blue-400 w-5 h-5" />
@@ -210,11 +211,12 @@ export default function OrderInventoryPage() {
             </tbody>
           </table>
         </div>
+        </div>
 
         {/* Modal */}
         {selectedOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 max-w-lg w-full relative shadow-lg border border-blue-100 overflow-y-auto max-h-[90vh]">
+            <div className="bg-white rounded-xl p-6 max-w-lg w-full relative shadow-sm border border-blue-100 overflow-y-auto max-h-[90vh]">
               <button onClick={() => setSelectedOrder(null)} className="absolute top-3 right-3 text-gray-500 hover:text-red-500"><X /></button>
               <h3 className="text-2xl font-semibold text-blue-800 mb-4">
                 {selectedOrder.nextStatus === "Shipped" || selectedOrder.nextStatus === "Delivered"
@@ -267,7 +269,7 @@ export default function OrderInventoryPage() {
                 onClick={handleSendEmail}
                 className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 shadow-sm"
               >
-                <Mail className="w-4 h-4"/> {sendingEmail ? "Sending..." : `Send ${selectedOrder.nextStatus} Email`}
+                {sendingEmail ? "Sending..." : `Send ${selectedOrder.nextStatus} Email`}
               </button>
             </div>
           </div>

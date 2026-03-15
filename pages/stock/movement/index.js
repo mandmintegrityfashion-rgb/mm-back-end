@@ -53,14 +53,15 @@ export default function StockMovement() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-white via-blue-50 to-blue-100 p-8">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-blue-900 tracking-tight">
-              M&M Fashion Stock Movements
+            <h1 className="text-3xl font-bold text-blue-800">
+              M&M Fashion — Stock Movements
             </h1>
-            <p className="text-sm text-blue-600 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               Manage and track all stock transfers across stores and warehouses.
             </p>
           </div>
@@ -73,7 +74,7 @@ export default function StockMovement() {
         </div>
 
         {/* Filters - Date Range */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-white p-6 rounded-xl shadow-md mb-4 border border-blue-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-white p-6 rounded-xl shadow-sm border border-blue-100">
           <div>
             <label className="block text-sm font-semibold text-blue-900 mb-2">
               From Date
@@ -99,7 +100,7 @@ export default function StockMovement() {
         </div>
 
         {/* Filters - Dropdowns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-6 rounded-xl shadow-md mb-6 border border-blue-100">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-6 rounded-xl shadow-sm border border-blue-100">
           <div>
             <label className="block text-sm font-semibold text-blue-900 mb-2">
               Filter by Location
@@ -151,7 +152,7 @@ export default function StockMovement() {
         </div>
 
         {/* Barcode Search */}
-        <div className="flex flex-col md:flex-row md:items-end gap-4 bg-white p-6 rounded-xl shadow-md mb-8 border border-blue-100">
+        <div className="flex flex-col md:flex-row md:items-end gap-4 bg-white p-6 rounded-xl shadow-sm border border-blue-100">
           <div className="flex-1">
             <label className="block text-sm font-semibold text-blue-900 mb-2">
               Scan or Enter Order Barcode
@@ -171,7 +172,7 @@ export default function StockMovement() {
         </div>
 
         {/* Movements Table */}
-        <div className="bg-white rounded-xl shadow-md overflow-x-auto border border-blue-100">
+        <div className="bg-white rounded-xl shadow-sm overflow-x-auto border border-blue-100">
           <table className="min-w-full text-sm text-gray-800">
             <thead className="bg-blue-100 text-blue-900">
               <tr>
@@ -249,6 +250,7 @@ export default function StockMovement() {
               )}
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </Layout>

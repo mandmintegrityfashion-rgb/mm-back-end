@@ -98,7 +98,7 @@ export default function ExpenseForm({ onSaved }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-gradient-to-b from-white to-blue-50 p-6 rounded-2xl shadow-md border border-blue-100 space-y-5 transition-all duration-300 hover:shadow-lg"
+      className="bg-white p-6 rounded-xl shadow-sm border border-blue-100 space-y-5"
     >
       {/* Header */}
       <h2 className="text-xl font-semibold text-blue-800 flex items-center gap-2 mb-2">

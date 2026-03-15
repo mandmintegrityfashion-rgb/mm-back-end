@@ -225,20 +225,20 @@ export default function Reporting() {
 
   return (
     <Layout title="Reporting">
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 md:p-10 transition-all duration-300">
-        <div className="max-w-screen-xl mx-auto space-y-10">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-8">
         {/* Header */}
         <header>
-          <h1 className="text-4xl font-extrabold text-blue-900 mb-2">
+          <h1 className="text-3xl font-bold text-blue-800">
             M&M Fashion — Performance Report
           </h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-sm mt-1">
             Insight into your sales, trends, and performance overview.
           </p>
         </header>
 
         {/* Filter Bar */}
-        <div className="bg-white rounded-2xl shadow-md px-6 py-5 border border-blue-100 space-y-4">
+        <div className="bg-white rounded-xl shadow-sm px-6 py-5 border border-blue-100 space-y-4">
           <div className="flex flex-wrap items-center gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Location</label>
@@ -311,7 +311,7 @@ export default function Reporting() {
         </div>
 
         {/* Line Chart */}
-        <div className="bg-white rounded-2xl shadow-md p-6 border border-blue-100 h-[350px] md:h-[400px]">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-blue-100 h-[350px] md:h-[400px]">
           <Line
             data={combinedLineData}
             options={{
@@ -381,7 +381,7 @@ export default function Reporting() {
 
 function Card({ title, value }) {
   return (
-    <div className="bg-white rounded-2xl shadow-md p-5 text-center border border-blue-100 hover:shadow-lg transition">
+    <div className="bg-white rounded-xl shadow-sm p-5 text-center border border-blue-100 hover:shadow-md transition">
       <p className="text-sm text-gray-500 mb-1">{title}</p>
       <p className="text-xl font-bold text-blue-900">{value}</p>
     </div>
@@ -390,7 +390,7 @@ function Card({ title, value }) {
 
 function ChartCard({ title, children }) {
   return (
-    <div className="bg-white rounded-2xl shadow-md p-6 border border-blue-100 hover:shadow-lg transition">
+    <div className="bg-white rounded-xl shadow-sm p-6 border border-blue-100 hover:shadow-md transition">
       <h3 className="font-semibold text-blue-800 mb-3">{title}</h3>
       {children}
     </div>

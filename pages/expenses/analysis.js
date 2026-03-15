@@ -103,20 +103,19 @@ export default function ExpenseAnalysis() {
 
   return (
     <Layout>
-      <div className="bg-gradient-to-b from-blue-50 to-white mx-auto px-6 py-10 space-y-10 text-gray-800">
-        {/* Header */}
-        <div className="max-w-screen-xl mx-auto space-y-10">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-blue-800 tracking-tight">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-blue-800">
             M&M Fashion — Expense Analysis
           </h1>
-          <p className="text-gray-500 text-lg">
+          <p className="text-gray-500 text-sm mt-1">
             Track, visualize, and manage all your fashion business expenses.
           </p>
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-white p-6 rounded-2xl border border-blue-100 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 bg-white p-6 rounded-xl border border-blue-100 shadow-sm">
           <div>
             <label className="block text-sm text-gray-600 mb-1 font-medium">
               Category
@@ -197,7 +196,7 @@ export default function ExpenseAnalysis() {
         </div>
 
         {/* Summary */}
-        <div className="bg-gradient-to-r from-blue-50 to-white border border-blue-100 p-8 rounded-2xl shadow text-center">
+        <div className="bg-white border border-blue-100 p-8 rounded-xl shadow-sm text-center">
           <h2 className="text-lg font-semibold text-blue-700">
             Total Expenses
           </h2>
@@ -219,7 +218,7 @@ export default function ExpenseAnalysis() {
             {/* Chart + Expense List */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Chart */}
-              <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm">
+              <div className="bg-white p-6 rounded-xl border border-blue-100 shadow-sm">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold text-blue-700">
                     Category Breakdown
@@ -286,7 +285,7 @@ export default function ExpenseAnalysis() {
               </div>
 
               {/* Expense List */}
-              <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm">
+              <div className="bg-white p-6 rounded-xl border border-blue-100 shadow-sm">
                 <h2 className="text-lg font-semibold text-blue-700 mb-4">
                   Recent Expenses
                 </h2>

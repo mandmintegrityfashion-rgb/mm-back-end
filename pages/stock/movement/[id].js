@@ -74,9 +74,10 @@ export default function MovementDetails() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-[#f5f9fc] p-8">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-6">
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
             <h1 className="text-3xl font-bold text-blue-800">
               M&M Fashion — Stock Movement Details
@@ -228,6 +229,7 @@ export default function MovementDetails() {
           >
             Print
           </button>
+        </div>
         </div>
       </div>
     </Layout>

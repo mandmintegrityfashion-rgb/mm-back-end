@@ -169,9 +169,10 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 text-blue-900">
-        <header className="flex flex-col sm:flex-row justify-between mb-6">
-          <h1 className="text-4xl font-bold">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-8">
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-3xl font-bold text-blue-800">
             Welcome, {user.name || "Admin"}
           </h1>
           <div className="flex gap-3">
@@ -191,7 +192,7 @@ export default function Home() {
         </header>
 
         {/* Period Filter */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-2">
           {periodLabels.map((p) => (
             <button
               key={p.value}
@@ -208,7 +209,7 @@ export default function Home() {
         </div>
 
         {/* KPIs */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <KpiCard
             label="Total Sales"
             value={`₦${kpis.sales.toLocaleString()}`}
@@ -243,7 +244,7 @@ export default function Home() {
         </section>
 
         {/* Lists */}
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-10">
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           <ListCard
             title="Top Staff by Sales"
             items={byStaff.map((s) => ({
@@ -267,6 +268,7 @@ export default function Home() {
           />
           <ListCard title="Recent Orders" items={recentOrders} />
         </section>
+        </div>
       </div>
     </Layout>
   );
@@ -279,7 +281,7 @@ function KpiCard({ label, value, changePercent }) {
     <motion.div
       whileHover={{ scale: 1.035 }}
       transition={{ type: "spring", stiffness: 220 }}
-      className="bg-white rounded-2xl shadow-lg p-5 flex flex-col items-center border border-blue-100 hover:shadow-xl"
+      className="bg-white rounded-xl shadow-sm p-5 flex flex-col items-center border border-blue-100 hover:shadow-md"
     >
       <span className="text-2xl font-bold">{value}</span>
       <span className="text-sm text-blue-600">{label}</span>
@@ -298,7 +300,7 @@ function ChartCard({ title, children }) {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className="bg-white rounded-2xl shadow-lg p-5 border border-blue-100 h-[40vh]"
+      className="bg-white rounded-xl shadow-sm p-5 border border-blue-100 h-[40vh]"
     >
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
       <div className="h-full">{children}</div>
@@ -310,7 +312,7 @@ function ListCard({ title, items = [] }) {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className="bg-white rounded-2xl shadow-lg p-5 border border-blue-100 h-[40vh] overflow-y-auto"
+      className="bg-white rounded-xl shadow-sm p-5 border border-blue-100 h-[40vh] overflow-y-auto"
     >
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
       <ul className="space-y-2 text-sm">

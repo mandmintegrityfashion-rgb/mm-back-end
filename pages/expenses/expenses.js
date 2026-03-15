@@ -57,13 +57,13 @@ export default function ManageExpenses() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 ">
-        <div className="max-w-screen-xl mx-auto">
-          <h1 className="text-3xl font-bold text-blue-800 mb-6">M&M Fashion — Expense Management</h1>
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-6">
+          <h1 className="text-3xl font-bold text-blue-800">M&M Fashion — Expense Management</h1>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Panel: Add Expense */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-blue-100">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-blue-100">
               <h2 className="text-xl font-semibold text-blue-700 mb-4">Add New Expense</h2>
               <ExpenseForm
                 onSaved={fetchExpenses}
@@ -73,7 +73,7 @@ export default function ManageExpenses() {
 
             {/* Right Panel: Parent Card for Expenses */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 flex flex-col gap-4">
+              <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-6 flex flex-col gap-4">
                 {/* Search */}
                 <div className="flex flex-col sm:flex-row items-center gap-3 mb-4">
                   <input
@@ -81,7 +81,7 @@ export default function ManageExpenses() {
                     placeholder="Search expenses..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="border border-gray-300 px-4 py-2 rounded-lg w-full sm:w-1/3"
+                    className="border border-blue-200 px-4 py-2 rounded-lg w-full sm:w-1/3"
                   />
                   <button
                     onClick={handleSearch}

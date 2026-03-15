@@ -1,8 +1,6 @@
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import Loader from "./Loader";
 
 function toDateInputValue(v) {
@@ -143,8 +141,11 @@ export default function ProductForm(props) {
       return;
     }
 
+    const toTitleCase = (str) =>
+      str.replace(/\b\w/g, (c) => c.toUpperCase());
+
     const data = {
-      name,
+      name: toTitleCase(name.trim()),
       description,
       costPrice,
       taxRate,
@@ -360,7 +361,7 @@ export default function ProductForm(props) {
                 setProperties(properties.filter((_, idx) => idx !== i))
               }
             >
-              <FontAwesomeIcon icon={faTrash} />
+              Remove
             </button>
           </div>
         ))}
@@ -424,10 +425,10 @@ export default function ProductForm(props) {
               />
               <button
                 type="button"
-                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded"
+                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded text-xs"
                 onClick={() => setImages(images.filter((_, idx) => idx !== i))}
               >
-                <FontAwesomeIcon icon={faTrash} />
+                Remove
               </button>
             </div>
           ))}

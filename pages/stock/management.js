@@ -37,13 +37,13 @@ export default function StockManagement() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-8">
-        {/* Header */}
-        <header className="mb-10 text-start">
-          <h1 className="text-4xl font-extrabold text-blue-900 mb-2 tracking-tight">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-8">
+        <header>
+          <h1 className="text-3xl font-bold text-blue-800">
             M&M Fashion — Stock Management
           </h1>
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-500 text-sm mt-1">
             Monitor and control your fashion inventory with elegance.
           </p>
         </header>
@@ -68,7 +68,7 @@ export default function StockManagement() {
         </div>
 
         {/* Table */}
-        <section className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-blue-100">
+        <section className="overflow-x-auto bg-white rounded-xl shadow-sm border border-blue-100">
           <table className="min-w-full divide-y divide-blue-100">
             <thead className="bg-blue-100/50 text-blue-900 uppercase text-xs font-semibold tracking-wide">
               <tr>
@@ -128,6 +128,7 @@ export default function StockManagement() {
             </tbody>
           </table>
         </section>
+        </div>
       </div>
     </Layout>
   );
@@ -136,9 +137,9 @@ export default function StockManagement() {
 function StatCard({ label, value, highlight = false }) {
   return (
     <div
-      className={`bg-white rounded-2xl shadow-md p-6 flex flex-col items-center text-center border-t-4 ${
+      className={`bg-white rounded-xl shadow-sm p-6 flex flex-col items-center text-center border-t-4 ${
         highlight ? "border-blue-400" : "border-transparent"
-      } hover:shadow-lg transition-all duration-200`}
+      } hover:shadow-md transition-all duration-200`}
     >
       <p className="text-sm text-gray-500">{label}</p>
       <p className="mt-2 text-2xl font-bold text-blue-900">{value}</p>

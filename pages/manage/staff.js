@@ -79,16 +79,17 @@ export default function StaffPage() {
 
   return (
     <Layout>
-      <div className="p-8 w-full mx-auto bg-gray-50 min-h-screen">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-3xl font-bold text-blue-800">M&M Fashion — Staff</h1>
-          <p className="text-gray-500 mt-2 sm:mt-0">
-            Manage all your staff accounts easily ✨
+          <p className="text-gray-500 text-sm mt-1 sm:mt-0">
+            Manage all your staff accounts easily
           </p>
         </div>
 
         {/* Add Staff Section */}
-        <div className="bg-white shadow-md rounded-xl p-6 mb-10 border border-blue-100">
+        <div className="bg-white shadow-sm rounded-xl p-6 mb-10 border border-blue-100">
           <h2 className="text-lg font-semibold text-blue-700 mb-4">
             Add New Staff Member
           </h2>
@@ -128,7 +129,7 @@ export default function StaffPage() {
         </div>
 
         {/* Staff List Section */}
-        <div className="overflow-x-auto bg-white shadow-md rounded-xl border border-blue-100">
+        <div className="overflow-x-auto bg-white shadow-sm rounded-xl border border-blue-100">
           {loading ? (
             <div className="flex justify-center items-center h-48">
               <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -228,6 +229,7 @@ export default function StaffPage() {
               </tbody>
             </table>
           )}
+        </div>
         </div>
       </div>
     </Layout>

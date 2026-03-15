@@ -79,20 +79,19 @@ export default function PersonalTaxCalculator() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-10 px-6">
-        <div className="max-w-screen-xl mx-auto">
-          {/* Header */}
-          <header className=" pl-4 mb-8">
-            <h1 className="text-4xl font-extrabold text-blue-800 tracking-tight">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-8">
+          <header>
+            <h1 className="text-3xl font-bold text-blue-800">
               M&M Fashion — Personal Tax Calculator
             </h1>
-            <p className="text-gray-500 mt-1 max-w-2xl">
-              Compute your personal income tax according to the Nigeria Finance Act. Perfect for M&M Fashion staff and partners.
+            <p className="text-gray-500 text-sm mt-1">
+              Compute your personal income tax according to the Nigeria Finance Act.
             </p>
           </header>
 
           {/* Mode Selection */}
-          <div className="bg-white shadow-sm border border-blue-100 rounded-xl p-6 mb-8">
+          <div className="bg-white shadow-sm border border-blue-100 rounded-xl p-6">
             <h2 className="text-lg font-semibold text-blue-800 mb-3">
               Salary Input Mode
             </h2>
@@ -113,7 +112,7 @@ export default function PersonalTaxCalculator() {
           </div>
 
           {/* Input Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputBox
               label={`Gross ${mode === "monthly" ? "Monthly" : "Annual"} Income (₦)`}
               placeholder="e.g. 500000"
@@ -129,7 +128,7 @@ export default function PersonalTaxCalculator() {
           </div>
 
           {/* Deduction Section */}
-          <div className="bg-white shadow-sm border border-blue-100 rounded-xl p-6 mb-8">
+          <div className="bg-white shadow-sm border border-blue-100 rounded-xl p-6">
             <h2 className="text-lg font-semibold text-blue-800 mb-4">Other Deductions</h2>
             <div className="flex flex-wrap gap-4 items-center">
               <select
@@ -172,7 +171,7 @@ export default function PersonalTaxCalculator() {
           </div>
 
           {/* Calculate Button */}
-          <div className="mb-8">
+          <div>
             <button
               onClick={calculateTax}
               className="bg-blue-700 text-white font-semibold px-10 py-3 rounded-xl hover:bg-blue-800 transition shadow-lg"
@@ -183,7 +182,7 @@ export default function PersonalTaxCalculator() {
 
           {/* Result Section */}
           {result && (
-            <div className="bg-white shadow-md border border-blue-100 rounded-xl p-8">
+            <div className="bg-white shadow-sm border border-blue-100 rounded-xl p-8">
               <h2 className="text-2xl font-bold text-blue-800 mb-5">
                 Tax Summary ({mode === "monthly" ? "Monthly" : "Yearly"} Input)
               </h2>

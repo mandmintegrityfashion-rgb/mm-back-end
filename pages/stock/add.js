@@ -165,18 +165,19 @@ export default function StockMovementAdd() {
 
   return (
     <Layout>
-      <div className="p-8 bg-white min-h-screen">
-        <div className="border-b pb-4 mb-6">
-          <h1 className="text-3xl font-semibold text-blue-900">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-blue-800">
             M&M Fashion — Stock Movement
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 mt-1">
             Record stock transfers or restocks across your fashion outlets
           </p>
         </div>
 
         {/* Header Form */}
-        <div className="grid md:grid-cols-2 gap-6 bg-blue-50 p-6 rounded-2xl border border-blue-100 shadow-sm">
+        <div className="grid md:grid-cols-2 gap-6 bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm">
           <Dropdown
             label="Deliver stock from"
             value={fromLocation}
@@ -204,7 +205,7 @@ export default function StockMovementAdd() {
         </div>
 
         {/* Product Search */}
-        <div className="bg-white mt-6 p-6 rounded-2xl border border-gray-100 shadow-md">
+        <div className="bg-white mt-6 p-6 rounded-xl border border-blue-100 shadow-sm">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Search product (by name or barcode)
           </label>
@@ -270,7 +271,7 @@ export default function StockMovementAdd() {
         </div>
 
         {/* Product Table */}
-        <div className="bg-white mt-6 rounded-2xl border border-gray-100 shadow-sm overflow-auto">
+        <div className="bg-white mt-6 rounded-xl border border-blue-100 shadow-sm overflow-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-blue-100 text-blue-900 font-semibold">
               <tr>
@@ -343,6 +344,7 @@ export default function StockMovementAdd() {
           >
             Add to Stock
           </button>
+        </div>
         </div>
       </div>
     </Layout>

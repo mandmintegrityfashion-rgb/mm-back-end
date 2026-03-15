@@ -147,12 +147,13 @@ export default function SalesReport() {
 
   return (
     <Layout title="M&M Fashion Sales Report">
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6 text-blue-900 font-sans transition-all duration-300">
-        <header className="mb-10 text-start pt-4">
-          <h1 className="text-4xl font-extrabold text-blue-900 mb-2 tracking-tight">
-            M&M Fashion – Sales Report
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-6">
+        <header>
+          <h1 className="text-3xl font-bold text-blue-800">
+            M&M Fashion — Sales Report
           </h1>
-          <p className="text-sm text-blue-600">
+          <p className="text-gray-500 text-sm mt-1">
             Filter by date or amount, export or print your records with ease.
           </p>
         </header>
@@ -160,7 +161,7 @@ export default function SalesReport() {
         {/* Filters */}
         <div className="flex flex-col lg:flex-row gap-6 mb-6">
           {/* Calendar */}
-          <div className="bg-white rounded-xl border border-blue-100 shadow-md w-fit p-4">
+          <div className="bg-white rounded-xl border border-blue-100 shadow-sm w-fit p-4">
             <div className="flex justify-between items-center mb-2">
               <button
                 onClick={() =>
@@ -224,7 +225,7 @@ export default function SalesReport() {
           </div>
 
           {/* Amount Filters */}
-          <div className="bg-white rounded-xl border border-blue-100 shadow-md p-4 flex-1">
+          <div className="bg-white rounded-xl border border-blue-100 shadow-sm p-4 flex-1">
             <h2 className="text-sm font-semibold text-blue-700 mb-2">
               Filter by Amount
             </h2>
@@ -247,7 +248,7 @@ export default function SalesReport() {
           </div>
 
           {/* Export */}
-          <div className="bg-white rounded-xl border border-blue-100 shadow-md p-4 flex flex-col gap-3">
+          <div className="bg-white rounded-xl border border-blue-100 shadow-sm p-4 flex flex-col gap-3">
             <h2 className="text-sm font-semibold text-blue-700">
               Export Options
             </h2>
@@ -269,7 +270,7 @@ export default function SalesReport() {
         {/* Table */}
         <div
           id="print-section"
-          className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-blue-100"
+          className="overflow-x-auto bg-white rounded-xl shadow-sm border border-blue-100"
         >
           {loading ? (
             <div className="p-6 text-center text-blue-600">Loading transactions...</div>
@@ -340,7 +341,7 @@ export default function SalesReport() {
                         <tr className="bg-blue-50/40">
                           <td colSpan={8} className="px-6 py-4">
                             <table className="w-full text-sm">
-                              <thead className="bg-blue-100">
+                              <thead className="bg-blue-100 text-blue-900">
                                 <tr>
                                   <th className="px-3 py-2 text-left">Item</th>
                                   <th className="px-3 py-2 text-right">Qty</th>
@@ -386,6 +387,7 @@ export default function SalesReport() {
               Loading more records...
             </div>
           )}
+        </div>
         </div>
       </div>
     </Layout>

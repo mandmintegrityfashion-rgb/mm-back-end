@@ -2,6 +2,11 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import  Product  from "@/models/Product";
 
+function toTitleCase(str) {
+  if (!str) return str;
+  return str.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export default async function handler(req, res) {
   const { method } = req;
   await mongooseConnect();
@@ -55,7 +60,7 @@ export default async function handler(req, res) {
       } = req.body;
 
       const productDoc = await Product.create({
-        name,
+        name: toTitleCase(name),
         description,
         costPrice,
         taxRate,
@@ -110,7 +115,7 @@ export default async function handler(req, res) {
       const updated = await Product.findByIdAndUpdate(
         _id,
         {
-          name,
+          name: toTitleCase(name),
           description,
           costPrice,
           taxRate,

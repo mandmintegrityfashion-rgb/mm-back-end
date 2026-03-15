@@ -232,10 +232,11 @@ export default function Products() {
 
   return (
     <Layout>
-      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen rounded-2xl">
+      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="max-w-screen-xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-blue-800">M&M Fashion — Products</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+          <h1 className="text-3xl font-bold text-blue-800">M&M Fashion — Products</h1>
 
           {/* When linking to product creation, set highlight to newly created product if you want.
               For edit page navigation, we store highlight in sessionStorage below via onClick handler. */}
@@ -263,7 +264,7 @@ export default function Products() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-2xl shadow border border-blue-100 bg-white">
+        <div className="overflow-x-auto rounded-xl shadow-sm border border-blue-100 bg-white">
           <table className="min-w-full text-sm divide-y divide-blue-100">
             <thead className="bg-blue-600 text-white text-left">
               <tr>
@@ -433,7 +434,7 @@ export default function Products() {
                           }}
                           className="py-1 px-3 bg-red-50 text-red-700 border border-red-300 hover:bg-red-600 hover:text-white rounded text-xs"
                         >
-                          X
+                          Delete
                         </button>
                       </td>
                     </tr>
@@ -456,6 +457,7 @@ export default function Products() {
           ) : (
             <div className="text-sm text-gray-500">End of list</div>
           )}
+        </div>
         </div>
       </div>
     </Layout>
