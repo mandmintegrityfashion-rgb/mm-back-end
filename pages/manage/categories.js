@@ -4,6 +4,7 @@ import Layout from "@/components/Layout";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Loader from "@/components/Loader";
+import compressImage from "@/lib/compressImage";
 
 export default function Categories() {
   const [name, setName] = useState("");
@@ -27,7 +28,7 @@ export default function Categories() {
     })();
   }, []);
 
-  // Image upload — mirrors ProductForm's working pattern
+  // Image upload with client-side compression
   const uploadImages = async (e) => {
     const files = e.target.files;
     if (!files?.length) return;
@@ -41,10 +42,13 @@ export default function Categories() {
     }));
     setImages((prev) => [...prev, ...previews]);
 
-    const formData = new FormData();
-    for (const f of files) formData.append("file", f);
-
     try {
+      const compressed = await Promise.all(
+        Array.from(files).map((f) => compressImage(f))
+      );
+      const formData = new FormData();
+      for (const f of compressed) formData.append("file", f);
+
       const res = await axios.post("/api/upload", formData);
       const uploaded = res.data?.links || [];
       setImages((prev) => [
@@ -54,7 +58,11 @@ export default function Categories() {
     } catch (err) {
       console.error("Image upload failed:", err);
       setImages((prev) => prev.filter((img) => !img.isTemp));
-      alert("Image upload failed. Please try again.");
+      const msg =
+        err.response?.status === 413
+          ? "Image is too large. Please use a smaller image."
+          : "Image upload failed. Please try again.";
+      alert(msg);
     } finally {
       setLoading(false);
     }

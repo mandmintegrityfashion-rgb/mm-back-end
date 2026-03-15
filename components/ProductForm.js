@@ -2,6 +2,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
+import compressImage from "@/lib/compressImage";
 
 function toDateInputValue(v) {
   if (!v) return "";
@@ -384,12 +385,11 @@ export default function ProductForm(props) {
             <input
               type="file"
               multiple
+              accept="image/*"
               onChange={async (e) => {
                 const files = e.target.files;
                 if (!files?.length) return;
                 setLoading(true);
-                const formData = new FormData();
-                for (const f of files) formData.append("file", f);
                 const previews = Array.from(files).map((f) => ({
                   full: URL.createObjectURL(f),
                   thumb: URL.createObjectURL(f),
@@ -397,14 +397,24 @@ export default function ProductForm(props) {
                 }));
                 setImages((prev) => [...prev, ...previews]);
                 try {
+                  const compressed = await Promise.all(
+                    Array.from(files).map((f) => compressImage(f))
+                  );
+                  const formData = new FormData();
+                  for (const f of compressed) formData.append("file", f);
                   const res = await axios.post("/api/upload", formData);
                   const uploaded = res.data?.links || [];
                   setImages((prev) => [
                     ...prev.filter((img) => !img.isTemp),
                     ...uploaded,
                   ]);
-                } catch {
+                } catch (err) {
                   setImages((prev) => prev.filter((img) => !img.isTemp));
+                  const msg =
+                    err.response?.status === 413
+                      ? "Image is too large. Please use a smaller image."
+                      : "Image upload failed. Please try again.";
+                  setErrorMessage(msg);
                 } finally {
                   setLoading(false);
                 }
