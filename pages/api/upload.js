@@ -3,7 +3,7 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { mongooseConnect } from "@/lib/mongoose";
 
-const S3BucketName = "mm-fashion-store";
+const S3BucketName = "mm-fashion-store-463183325467-eu-north-1-an";
 
 export default async function ImageHandler(req, res) {
   try {
