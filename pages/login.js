@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { Playfair_Display, Inter } from "next/font/google";
 
 const playfair = Playfair_Display({
@@ -27,6 +27,14 @@ export default function Login() {
   const [resetCode, setResetCode] = useState("");
   const [newPin, setNewPin] = useState("");
   const router = useRouter();
+
+  const parseJsonSafely = async (res) => {
+    try {
+      return await res.json();
+    } catch {
+      return {};
+    }
+  };
 
   const handleNumberClick = (num) => {
     if (isForgotPin && forgotStep === 2) {
@@ -66,8 +74,8 @@ export default function Login() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: forgotEmail }),
         });
-        const data = await res.json();
-        if (data.ok) {
+        const data = await parseJsonSafely(res);
+        if (res.ok && data.ok) {
           alert("Reset code sent to your email!");
           setForgotStep(2);
         } else {
@@ -79,8 +87,8 @@ export default function Login() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: forgotEmail, resetCode, newPin }),
         });
-        const data = await res.json();
-        if (data.ok) {
+        const data = await parseJsonSafely(res);
+        if (res.ok && data.ok) {
           alert("PIN reset successful! Please log in with your new PIN.");
           setIsForgotPin(false);
           setForgotStep(1);
@@ -91,6 +99,8 @@ export default function Login() {
           alert(data.error || "Failed to reset PIN.");
         }
       }
+    } catch (error) {
+      alert("Unable to complete the PIN reset request right now.");
     } finally {
       setLoading(false);
     }
@@ -99,6 +109,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
       const payload = isRegister
@@ -111,14 +122,18 @@ export default function Login() {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      const data = await parseJsonSafely(res);
 
-      if (data.ok) {
+      if (res.ok && data.ok) {
         if (isRegister) {
           alert("Registration successful! Please log in.");
           setIsRegister(false);
         } else {
-          router.push("/");
+          try {
+            await router.replace("/");
+          } catch {
+            window.location.replace("/");
+          }
         }
         setUsername("");
         setEmail("");
@@ -126,6 +141,8 @@ export default function Login() {
       } else {
         alert(data.error || "Something went wrong.");
       }
+    } catch (error) {
+      alert("Unable to complete login right now. Please try again.");
     } finally {
       setLoading(false);
     }
