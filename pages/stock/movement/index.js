@@ -53,7 +53,7 @@ export default function StockMovement() {
 
   return (
     <Layout>
-      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+      <div className="min-h-screen bg-slate-50 p-6">
         <div className="max-w-screen-xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

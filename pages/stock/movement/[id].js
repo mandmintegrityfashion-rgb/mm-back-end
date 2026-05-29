@@ -74,7 +74,7 @@ export default function MovementDetails() {
 
   return (
     <Layout>
-      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+      <div className="min-h-screen bg-slate-50 p-6">
         <div className="max-w-screen-xl mx-auto space-y-6">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">

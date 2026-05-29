@@ -146,7 +146,7 @@ export default function TaxAnalysisPage() {
 
   return (
     <Layout>
-      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+      <div className="min-h-screen bg-slate-50 p-6">
         <div className="max-w-screen-xl mx-auto space-y-8">
           <header>
             <h1 className="text-3xl font-bold text-blue-800">
@@ -339,7 +339,7 @@ export default function TaxAnalysisPage() {
 function StatBox({ label, value, color }) {
   return (
     <div
-      className={`bg-gradient-to-br ${color} border border-blue-100 p-5 rounded-xl shadow-sm flex flex-col items-start`}
+      className={`bg-white ${color} border border-blue-100 p-5 rounded-xl shadow-sm flex flex-col items-start`}
     >
       <p className="text-sm font-medium text-blue-700 mb-2">{label}</p>
       <p className="text-xl font-bold text-blue-900">{value}</p>

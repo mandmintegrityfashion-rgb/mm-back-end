@@ -279,7 +279,7 @@ export default function Home() {
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button
                     onClick={() => router.push("/products/new")}
-                    className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(29,78,216,0.24)]"
+                    className="inline-flex items-center justify-center rounded-md bg-[var(--mm-blue)] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--mm-blue-dark)]"
                   >
                     + Add Product
                   </button>
@@ -298,23 +298,21 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(150deg,var(--mm-navy),#16357a_52%,var(--mm-blue))] p-6 text-white shadow-[0_28px_70px_rgba(15,23,42,0.26)]">
-                <div className="absolute -right-10 -top-12 h-36 w-36 rounded-full border border-white/15" />
-                <div className="absolute bottom-0 right-0 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-blue-100/80">
+              <div className="rounded-xl border border-blue-100 bg-white p-6 text-[var(--mm-navy)] shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                   Live signal
                 </p>
                 <div className="mt-6 space-y-4">
                   {spotlightStats.map((item) => (
                     <div
                       key={item.label}
-                      className="rounded-3xl border border-white/12 bg-white/10 px-4 py-4 backdrop-blur-sm"
+                      className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-4"
                     >
-                      <p className="text-xs font-semibold uppercase tracking-[0.26em] text-blue-100/80">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         {item.label}
                       </p>
-                      <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
-                      <p className="mt-2 text-sm text-blue-100/75">{item.note}</p>
+                      <p className="mt-2 text-3xl font-semibold text-[var(--mm-ink)]">{item.value}</p>
+                      <p className="mt-2 text-sm text-slate-600">{item.note}</p>
                     </div>
                   ))}
                 </div>
@@ -330,8 +328,8 @@ export default function Home() {
               onClick={() => setPeriod(p.value)}
                 className={`rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
                 period === p.value
-                    ? "border-transparent bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] text-white shadow-[0_14px_28px_rgba(29,78,216,0.22)]"
-                    : "border border-white/80 bg-white/90 text-[var(--mm-navy)] shadow-sm hover:border-blue-200 hover:bg-blue-50"
+                    ? "border border-[var(--mm-blue)] bg-[var(--mm-blue)] text-white shadow-sm"
+                    : "border border-slate-200 bg-white text-[var(--mm-navy)] shadow-sm hover:border-blue-200 hover:bg-blue-50"
               }`}
             >
               {p.label}
@@ -416,9 +414,8 @@ function KpiCard({ label, value, changePercent, tone = "blue" }) {
     <motion.article
       whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 220 }}
-      className="shell-panel p-6"
+      className="card"
     >
-      <div className={`absolute -right-8 top-0 h-24 w-24 rounded-full blur-2xl ${accent.orb}`} />
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
         {label}
       </p>

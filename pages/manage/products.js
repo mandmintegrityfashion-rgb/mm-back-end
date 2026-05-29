@@ -244,7 +244,7 @@ export default function Products() {
 
               <Link
                 href="../products/new"
-                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(29,78,216,0.24)]"
+                className="inline-flex items-center justify-center rounded-md bg-[var(--mm-blue)] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--mm-blue-dark)]"
               >
                 + Add Product
               </Link>

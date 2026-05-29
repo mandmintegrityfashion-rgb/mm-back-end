@@ -49,17 +49,17 @@ export default function Nav({ isOpen, onClose }) {
   }, [router]);
 
   const railItemClass = (isActive) =>
-    `group mx-3 flex w-[calc(100%-1.5rem)] flex-col items-center justify-center rounded-[26px] border px-2 py-4 text-center transition-all duration-300 ${
+    `flex flex-col items-center justify-center rounded-md px-2 py-4 text-center text-xs transition-colors duration-200 ${
       isActive
-        ? "border-transparent bg-[linear-gradient(145deg,var(--mm-navy),var(--mm-blue))] text-white shadow-[0_18px_40px_rgba(29,78,216,0.28)]"
-        : "border-white/75 bg-white/78 text-slate-600 shadow-[0_12px_24px_rgba(15,23,42,0.05)] hover:border-slate-200 hover:bg-white hover:text-[var(--mm-navy)]"
+        ? "bg-blue-600 font-semibold text-white shadow-sm"
+        : "text-blue-800 hover:bg-blue-50 hover:text-blue-600"
     }`;
 
   const subMenuItemClass = (isActive) =>
-    `flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+    `flex items-center justify-between rounded-md px-4 py-3 text-sm font-medium transition-colors duration-200 ${
       isActive
-        ? "bg-[var(--mm-navy)] text-white shadow-[0_12px_28px_rgba(15,23,42,0.22)]"
-        : "text-slate-600 hover:bg-blue-50 hover:text-[var(--mm-navy)]"
+        ? "bg-blue-100 text-blue-700"
+        : "text-blue-800 hover:bg-blue-50 hover:text-blue-600"
     }`;
 
   const renderMenuItem = (href, icon, label) => (
@@ -73,7 +73,7 @@ export default function Nav({ isOpen, onClose }) {
         className={railItemClass(pathname === href)}
       >
         <FontAwesomeIcon icon={icon} className="h-5 w-5" />
-        <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+        <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
           {label}
         </span>
       </Link>
@@ -94,11 +94,7 @@ export default function Nav({ isOpen, onClose }) {
             }}
           >
             <span>{label}</span>
-            <span
-              className={`h-2 w-2 rounded-full ${
-                isActive ? "bg-[var(--mm-gold)]" : "bg-slate-300"
-              }`}
-            />
+            <span className={`h-2 w-2 rounded-full ${isActive ? "bg-blue-600" : "bg-slate-300"}`} />
           </Link>
         </li>
       );
@@ -110,7 +106,7 @@ export default function Nav({ isOpen, onClose }) {
     <>
       {/* Mobile Backdrop */}
       <div
-        className={`fixed inset-0 bg-slate-900/35 backdrop-blur-sm transition-opacity duration-300 sm:hidden ${
+        className={`fixed inset-0 bg-black/40 transition-opacity duration-300 sm:hidden ${
           isOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -121,22 +117,22 @@ export default function Nav({ isOpen, onClose }) {
       {/* Sidebar */}
       <aside
         ref={sidebarRef} // ✅ Reference to detect outside clicks
-        className={`fixed left-0 top-20 z-20 h-[calc(100vh-5rem)] w-24 overflow-visible border-r border-white/70 bg-[rgba(248,250,252,0.74)] shadow-[10px_0_40px_rgba(15,23,42,0.07)] backdrop-blur-xl transform transition-transform duration-300 sm:translate-x-0 ${
+        className={`fixed left-0 top-16 z-20 h-[calc(100vh-4rem)] w-20 overflow-visible border-r border-blue-100 bg-white shadow-sm transform transition-transform duration-300 sm:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
         }`}
       >
         <div className="flex h-full flex-col">
-          <div className="px-3 pt-5">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] text-sm font-semibold uppercase tracking-[0.28em] text-white shadow-[0_18px_34px_rgba(29,78,216,0.2)]">
+          <div className="px-2 pt-6">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-blue-600 text-sm font-semibold uppercase tracking-[0.2em] text-white">
               MM
             </div>
-            <p className="mt-3 text-center text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--mm-muted)]">
-              Control
+            <p className="mt-3 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Menu
             </p>
           </div>
 
           <nav className="mt-6 flex-1 overflow-y-auto pb-6">
-            <ul className="space-y-3">
+            <ul className="space-y-4">
             {renderMenuItem("/", faHome, "Home")}
             {renderMenuItem("/setup/setup", faCog, "Setup")}
 
@@ -154,7 +150,7 @@ export default function Nav({ isOpen, onClose }) {
                 onClick={() => toggleMenu("manage")}
               >
                 <FontAwesomeIcon icon={faList} className="h-5 w-5" />
-                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
                   Manage
                 </span>
                 <FontAwesomeIcon
@@ -166,13 +162,13 @@ export default function Nav({ isOpen, onClose }) {
               </button>
 
               <ul
-                className={`absolute left-[calc(100%+0.9rem)] top-0 z-50 w-[min(16rem,calc(100vw-7rem))] rounded-[28px] border border-white/80 bg-white/92 p-3 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 ease-out ${
+                className={`absolute left-full top-0 z-50 ml-3 w-52 rounded-md border border-blue-100 bg-white p-2 shadow-md transition-all duration-200 ${
                   openMenu === "manage"
                     ? "translate-x-0 opacity-100"
-                    : "translate-x-6 opacity-0 pointer-events-none"
+                    : "translate-x-8 opacity-0 pointer-events-none"
                 }`}
               >
-                <div className="mb-3 rounded-[24px] bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-4 py-3 text-sm font-semibold text-white shadow-sm">
+                <div className="mb-2 border-b border-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">
                   Manage Section
                 </div>
                 <div className="space-y-1.5">
@@ -198,7 +194,7 @@ export default function Nav({ isOpen, onClose }) {
                 onClick={() => toggleMenu("reporting")}
               >
                 <FontAwesomeIcon icon={faChartLine} className="h-5 w-5" />
-                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
                   Reports
                 </span>
                 <FontAwesomeIcon
@@ -210,13 +206,13 @@ export default function Nav({ isOpen, onClose }) {
               </button>
 
               <ul
-                className={`absolute left-[calc(100%+0.9rem)] top-0 z-50 w-[min(16rem,calc(100vw-7rem))] rounded-[28px] border border-white/80 bg-white/92 p-3 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 ease-out ${
+                className={`absolute left-full top-0 z-50 ml-3 w-52 rounded-md border border-blue-100 bg-white p-2 shadow-md transition-all duration-200 ${
                   openMenu === "reporting"
                     ? "translate-x-0 opacity-100"
-                    : "translate-x-6 opacity-0 pointer-events-none"
+                    : "translate-x-8 opacity-0 pointer-events-none"
                 }`}
               >
-                <div className="mb-3 rounded-[24px] bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-4 py-3 text-sm font-semibold text-white shadow-sm">
+                <div className="mb-2 border-b border-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">
                   Reports
                 </div>
                 <div className="space-y-1.5">
@@ -246,7 +242,7 @@ export default function Nav({ isOpen, onClose }) {
                 onClick={() => toggleMenu("expenses")}
               >
                 <FontAwesomeIcon icon={faCoins} className="h-5 w-5" />
-                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
                   Expenses
                 </span>
                 <FontAwesomeIcon
@@ -258,13 +254,13 @@ export default function Nav({ isOpen, onClose }) {
               </button>
 
               <ul
-                className={`absolute left-[calc(100%+0.9rem)] top-0 z-50 w-[min(16rem,calc(100vw-7rem))] rounded-[28px] border border-white/80 bg-white/92 p-3 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 ease-out ${
+                className={`absolute left-full top-0 z-50 ml-3 w-52 rounded-md border border-blue-100 bg-white p-2 shadow-md transition-all duration-200 ${
                   openMenu === "expenses"
                     ? "translate-x-0 opacity-100"
-                    : "translate-x-6 opacity-0 pointer-events-none"
+                    : "translate-x-8 opacity-0 pointer-events-none"
                 }`}
               >
-                <div className="mb-3 rounded-[24px] bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-4 py-3 text-sm font-semibold text-white shadow-sm">
+                <div className="mb-2 border-b border-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">
                   Expenses
                 </div>
                 <div className="space-y-1.5">
@@ -287,20 +283,8 @@ export default function Nav({ isOpen, onClose }) {
 
       {/* Loading Spinner */}
       {loading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/25 backdrop-blur-sm">
-          <div className="rounded-[28px] border border-white/70 bg-white/78 px-8 py-7 shadow-[0_28px_80px_rgba(15,23,42,0.18)] backdrop-blur-xl">
-            <div className="flex items-center gap-4 text-[var(--mm-navy)]">
-              <div className="h-12 w-12 rounded-full border-4 border-slate-200 border-t-[var(--mm-blue)] animate-spin"></div>
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
-                  Navigating
-                </p>
-                <p className="mt-1 text-sm font-semibold text-[var(--mm-ink)]">
-                  Loading workspace view
-                </p>
-              </div>
-            </div>
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="h-16 w-16 rounded-full border-4 border-white border-t-blue-500 animate-spin"></div>
         </div>
       )}
     </>

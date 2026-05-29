@@ -149,7 +149,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-tr from-[#e6efff] via-[#f6f9ff] to-[#dce8ff] text-[#1a1a1a] overflow-hidden relative">
+    <div className="relative flex min-h-screen overflow-hidden bg-slate-50 text-[#1a1a1a]">
       {/* Background section (Left Side) */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center">
         <div
@@ -183,7 +183,7 @@ export default function Login() {
       </div>
 
       {/* Form section (Right Side) */}
-      <div className="flex flex-col justify-center w-full lg:w-1/2 px-8 sm:px-12 lg:px-20 py-10 bg-white/70 backdrop-blur-xl shadow-2xl relative z-20">
+      <div className="relative z-20 flex w-full flex-col justify-center bg-white px-8 py-10 shadow-sm sm:px-12 lg:w-1/2 lg:px-20">
         <div className="max-w-md mx-auto w-full">
           <h2
             className={`${playfair.className} text-4xl font-bold text-center text-[#0a1e40] mb-3`}
@@ -255,7 +255,7 @@ export default function Login() {
                           else if (item === "Clear") handleClear();
                           else handleNumberClick(item);
                         }}
-                        className="bg-gradient-to-b from-blue-50 to-white border border-blue-100 text-[#0a1e40] py-4 rounded-xl text-lg font-semibold hover:from-blue-600 hover:to-blue-500 hover:text-white active:scale-90 active:shadow-inner active:from-blue-700 active:to-blue-600 active:text-white transition-all duration-150 shadow-sm select-none"
+                        className="rounded-xl border border-blue-100 bg-white py-4 text-lg font-semibold text-[#0a1e40] shadow-sm transition-all duration-150 hover:bg-blue-50 active:scale-95 select-none"
                       >
                         {item}
                       </button>
@@ -335,7 +335,7 @@ export default function Login() {
                     else if (item === "Clear") handleClear();
                     else handleNumberClick(item);
                   }}
-                  className="bg-gradient-to-b from-blue-50 to-white border border-blue-100 text-[#0a1e40] py-4 rounded-xl text-lg font-semibold hover:from-blue-600 hover:to-blue-500 hover:text-white active:scale-90 active:shadow-inner active:from-blue-700 active:to-blue-600 active:text-white transition-all duration-150 shadow-sm select-none"
+                  className="rounded-xl border border-blue-100 bg-white py-4 text-lg font-semibold text-[#0a1e40] shadow-sm transition-all duration-150 hover:bg-blue-50 active:scale-95 select-none"
                 >
                   {item}
                 </button>

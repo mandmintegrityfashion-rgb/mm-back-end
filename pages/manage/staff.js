@@ -143,7 +143,7 @@ export default function StaffPage() {
               />
               <button
                 type="submit"
-                className="rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]"
+                className="rounded-md bg-[var(--mm-blue)] px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--mm-blue-dark)]"
               >
                 Add Staff
               </button>

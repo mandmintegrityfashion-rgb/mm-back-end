@@ -131,7 +131,7 @@ export default function PromotionManagement() {
           </div>
           <button
             onClick={openModal}
-            className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]"
+            className="inline-flex items-center justify-center rounded-md bg-[var(--mm-blue)] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--mm-blue-dark)]"
           >
             + Add Promotion
           </button>
@@ -264,7 +264,7 @@ export default function PromotionManagement() {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="shell-panel w-full max-w-lg p-6 lg:p-8">
             <span className="shell-pill">New promotion</span>
             <h3 className="mt-5 text-2xl font-semibold text-[var(--mm-ink)]">
@@ -317,7 +317,7 @@ export default function PromotionManagement() {
               </button>
               <button
                 onClick={handleSavePromotion}
-                className="rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]"
+                className="rounded-md bg-[var(--mm-blue)] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--mm-blue-dark)]"
               >
                 Save Promotion
               </button>

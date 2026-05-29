@@ -250,7 +250,7 @@ export default function HeroSetup() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -200 }}
                       transition={{ duration: 0.5 }}
-                      className="relative flex h-[460px] w-full items-center justify-center overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,var(--mm-navy),#16357a_54%,var(--mm-blue))]"
+                      className="relative flex h-[460px] w-full items-center justify-center overflow-hidden rounded-[18px] bg-slate-100"
                     >
                       <div className="absolute inset-0 overflow-hidden">
                         {currentHero.bgImage?.[0]?.full ? (
@@ -265,17 +265,17 @@ export default function HeroSetup() {
                         ) : (
                           <div className="h-full w-full animate-pulse bg-blue-100" />
                         )}
-                        <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(15,23,42,0.78),rgba(15,23,42,0.38),rgba(15,23,42,0.62))]" />
+                        <div className="absolute inset-0 bg-slate-900/45" />
                       </div>
 
                       <div className="absolute inset-x-6 top-6 flex flex-wrap items-center justify-between gap-3 text-white">
-                        <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-blue-100/90 backdrop-blur-sm">
+                        <span className="rounded-full border border-white/50 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--mm-navy)]">
                           {currentHero.status || "active"}
                         </span>
                         <div className="flex gap-2">
                           <button
                             onClick={() => editHeroPage(currentHero)}
-                            className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/20"
+                            className="rounded-md border border-white bg-white px-4 py-2 text-sm font-semibold text-[var(--mm-navy)] hover:bg-blue-50"
                           >
                             Edit
                           </button>
@@ -338,13 +338,13 @@ export default function HeroSetup() {
                         <>
                           <button
                             onClick={prevHero}
-                            className="absolute left-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-md backdrop-blur-sm transition hover:bg-white/20"
+                            className="absolute left-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white bg-white text-[var(--mm-navy)] shadow-sm transition hover:bg-blue-50"
                           >
                             &#8592;
                           </button>
                           <button
                             onClick={nextHero}
-                            className="absolute right-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-md backdrop-blur-sm transition hover:bg-white/20"
+                            className="absolute right-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white bg-white text-[var(--mm-navy)] shadow-sm transition hover:bg-blue-50"
                           >
                             &#8594;
                           </button>
@@ -445,10 +445,10 @@ export default function HeroSetup() {
                 <button
                   onClick={addOrUpdateHeroPage}
                   disabled={uploading}
-                  className={`rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)] transition-all ${
+                  className={`rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all ${
                     uploading
                       ? "cursor-not-allowed bg-slate-400"
-                      : "bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))]"
+                      : "bg-[var(--mm-blue)] hover:bg-[var(--mm-blue-dark)]"
                   }`}
                 >
                   {uploading ? "Saving..." : editId ? "Update Hero" : "Add Hero"}
@@ -506,7 +506,7 @@ function renderUploader(label, ref, handleChange, progress, images, setImages) {
       {progress > 0 && progress < 100 && (
         <div className="mt-4 h-2 w-full rounded-full bg-slate-200/80">
           <div
-            className="h-2 rounded-full bg-[linear-gradient(90deg,var(--mm-gold),var(--mm-blue))]"
+            className="h-2 rounded-full bg-[var(--mm-blue)]"
             style={{ width: `${progress}%` }}
           />
         </div>

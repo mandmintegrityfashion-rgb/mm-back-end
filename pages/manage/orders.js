@@ -299,7 +299,7 @@ export default function OrderInventoryPage() {
 
         {/* Modal */}
         {selectedOrder && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="shell-panel relative max-h-[90vh] w-full max-w-2xl overflow-y-auto p-6 lg:p-8">
               <button
                 onClick={() => setSelectedOrder(null)}
@@ -328,10 +328,10 @@ export default function OrderInventoryPage() {
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-white/70 bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] p-4 text-white shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-100/80">Summary</p>
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-[var(--mm-navy)] shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Summary</p>
                   <p className="mt-3 text-3xl font-semibold">{currency.format(selectedOrder.total ?? 0)}</p>
-                  <p className="mt-2 text-sm text-blue-100/80">Total order value for the selected transition.</p>
+                  <p className="mt-2 text-sm text-slate-600">Total order value for the selected transition.</p>
                 </div>
               </div>
 
@@ -393,7 +393,7 @@ export default function OrderInventoryPage() {
               <button
                 disabled={sendingEmail}
                 onClick={handleSendEmail}
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)] disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-[var(--mm-blue)] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--mm-blue-dark)] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {sendingEmail ? "Sending..." : `Send ${selectedOrder.nextStatus} Email`}
               </button>

@@ -266,7 +266,7 @@ export default function Categories() {
                   Images
                 </label>
                 <div className="flex flex-wrap gap-3 items-center">
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-[var(--mm-blue)] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--mm-blue-dark)]">
                     + Upload Images
                     <input
                       type="file"
@@ -345,7 +345,7 @@ export default function Categories() {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]"
+                  className="rounded-md bg-[var(--mm-blue)] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--mm-blue-dark)]"
                 >
                   {editingId ? "Update Category" : "Save Category"}
                 </button>
