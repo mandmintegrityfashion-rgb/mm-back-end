@@ -1,7 +1,7 @@
 "use client";
 
 import Layout from "@/components/Layout";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -37,7 +37,7 @@ export default function TaxAnalysisPage() {
     { label: "Custom Range", value: "custom" },
   ];
 
-  const fetchTaxData = async () => {
+  const fetchTaxData = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -78,11 +78,11 @@ export default function TaxAnalysisPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [period, selectedYear, customFrom, customTo]);
 
   useEffect(() => {
     fetchTaxData();
-  }, [period, selectedYear, customFrom, customTo]);
+  }, [fetchTaxData]);
 
   const handleDownload = () => {
     if (!taxData) return;

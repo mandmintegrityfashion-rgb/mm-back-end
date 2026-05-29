@@ -1,10 +1,11 @@
 // /pages/api/stock-movement/get.js
 
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import { StockMovement } from "@/models/StockMovement";
-import { Product } from "@/models/Product";
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   await mongooseConnect();
 
   if (req.method === "GET") {
@@ -42,4 +43,4 @@ export default async function handler(req, res) {
   }
 
   return res.status(405).json({ message: "Method Not Allowed" });
-}
+});

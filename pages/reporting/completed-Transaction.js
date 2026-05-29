@@ -1,7 +1,7 @@
 "use client";
 
 import Layout from "@/components/Layout";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { saveAs } from "file-saver";
 
 export default function SalesReport() {
@@ -16,11 +16,50 @@ export default function SalesReport() {
   const observerRef = useRef(null);
 
   // ---- Load cached filters & transactions ----
+  const fetchTransactions = useCallback(async ({
+    selectedDate: selectedDateFilter = null,
+    minAmount: minAmountFilter = "",
+    maxAmount: maxAmountFilter = "",
+  } = {}) => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/transactions/transactions");
+      if (!res.ok) throw new Error("Failed to fetch transactions");
+      const data = await res.json();
+      let filtered = data.transactions || [];
+
+      if (selectedDateFilter) {
+        const target = new Date(selectedDateFilter).toDateString();
+        filtered = filtered.filter(
+          (tx) => new Date(tx.createdAt).toDateString() === target
+        );
+      }
+
+      if (minAmountFilter) filtered = filtered.filter((tx) => tx.total >= +minAmountFilter);
+      if (maxAmountFilter) filtered = filtered.filter((tx) => tx.total <= +maxAmountFilter);
+
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      setTransactions(filtered);
+      localStorage.setItem("mm_transactions", JSON.stringify(filtered));
+      localStorage.setItem("mm_last_fetch", Date.now());
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const cachedFilters = JSON.parse(localStorage.getItem("mm_filters"));
     const cachedTx = JSON.parse(localStorage.getItem("mm_transactions"));
     const lastFetch = localStorage.getItem("mm_last_fetch");
     const lastExpanded = localStorage.getItem("mm_last_expanded");
+    const initialFilters = {
+      selectedDate: cachedFilters?.selectedDate || null,
+      minAmount: cachedFilters?.minAmount || "",
+      maxAmount: cachedFilters?.maxAmount || "",
+    };
 
     if (cachedFilters) {
       setSelectedDate(cachedFilters.selectedDate);
@@ -34,47 +73,9 @@ export default function SalesReport() {
     if (cachedTx && lastFetch && Date.now() - lastFetch < 86400000) {
       setTransactions(cachedTx);
     } else {
-      fetchTransactions();
+      fetchTransactions(initialFilters);
     }
-  }, []);
-
-  // ---- Fetch transactions with filters ----
-  async function fetchTransactions() {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/transactions/transactions");
-      if (!res.ok) throw new Error("Failed to fetch transactions");
-      const data = await res.json();
-      let filtered = data.transactions || [];
-
-      // Filter by date
-      if (selectedDate) {
-        const target = new Date(selectedDate).toDateString();
-        filtered = filtered.filter(
-          (tx) => new Date(tx.createdAt).toDateString() === target
-        );
-      }
-
-      // Filter by amount range
-      if (minAmount) filtered = filtered.filter((tx) => tx.total >= +minAmount);
-      if (maxAmount) filtered = filtered.filter((tx) => tx.total <= +maxAmount);
-
-      // Sort by date (latest first)
-      filtered.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-
-      setTransactions(filtered);
-
-      // Cache data
-      localStorage.setItem("mm_transactions", JSON.stringify(filtered));
-      localStorage.setItem("mm_last_fetch", Date.now());
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [fetchTransactions]);
 
   // ---- Re-fetch when filters change ----
   useEffect(() => {
@@ -82,8 +83,8 @@ export default function SalesReport() {
       "mm_filters",
       JSON.stringify({ selectedDate, minAmount, maxAmount })
     );
-    fetchTransactions();
-  }, [selectedDate, minAmount, maxAmount]);
+    fetchTransactions({ selectedDate, minAmount, maxAmount });
+  }, [selectedDate, minAmount, maxAmount, fetchTransactions]);
 
   // ---- Expand or collapse details ----
   const toggleDetails = (id) => {

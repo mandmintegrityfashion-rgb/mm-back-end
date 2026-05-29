@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
@@ -23,6 +24,11 @@ export default function NavBar({ onMenuToggle, user }) {
 
   const displayName = user?.name || user?.username || "Guest";
   const initials = getInitials(displayName) || "G";
+  const todayLabel = new Intl.DateTimeFormat("en-NG", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(new Date());
 
   async function handleLogout() {
     await logout();
@@ -52,110 +58,143 @@ export default function NavBar({ onMenuToggle, user }) {
   };
 
   return (
-    <div className="fixed top-0 w-full z-50 flex justify-between items-center py-3 px-4 sm:px-6 bg-gradient-to-r from-blue-50 via-white to-blue-100 shadow-sm border-b border-blue-200 backdrop-blur-md">
-      {/* Left */}
-      <div className="flex items-center gap-3">
-        <button
-          className="sm:hidden focus:outline-none"
-          onClick={onMenuToggle}
-          aria-label="Toggle menu"
-        >
-          <FontAwesomeIcon icon={faBars} className="w-6 h-6 text-blue-700" />
-        </button>
-        <FontAwesomeIcon
-          icon={faStore}
-          className="w-6 h-6 text-blue-700 drop-shadow-sm"
-        />
-        <h2 className="text-blue-900 text-lg sm:text-xl font-semibold tracking-wide">
-          M&M Store Manager
-        </h2>
-      </div>
-
-      {/* Right */}
-      <div className="flex items-center space-x-2 sm:space-x-6">
-        {/* Notifications */}
-        <div className="relative">
+    <header className="fixed inset-x-0 top-0 z-50 h-20 border-b border-white/70 bg-[rgba(244,247,252,0.78)] shadow-[0_20px_65px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      <div className="flex h-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        {/* Left */}
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           <button
-            onClick={handleNotifClick}
-            className="relative hover:scale-105 transition-transform duration-200"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/88 text-[var(--mm-navy)] shadow-sm sm:hidden"
+            onClick={onMenuToggle}
+            aria-label="Toggle menu"
           >
+            <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
+          </button>
+
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] text-white shadow-[0_16px_32px_rgba(29,78,216,0.22)]">
+            <FontAwesomeIcon icon={faStore} className="h-5 w-5" />
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[var(--mm-muted)]">
+              Operations cockpit
+            </p>
+            <h2 className="truncate text-lg font-semibold tracking-[0.02em] text-[var(--mm-ink)] sm:text-xl">
+              M&amp;M Store Manager
+            </h2>
+          </div>
+        </div>
+
+        {/* Right */}
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+          <div className="hidden items-center gap-2 rounded-full border border-white/80 bg-white/88 px-4 py-2 text-sm font-medium text-slate-600 shadow-sm lg:flex">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(34,197,94,0.16)]" />
+            {todayLabel}
+          </div>
+
+        {/* Notifications */}
+          <div className="relative">
+            <button
+              onClick={handleNotifClick}
+              className="group relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/88 text-[var(--mm-navy)] shadow-sm transition hover:shadow-lg"
+            >
             <FontAwesomeIcon
               icon={faBell}
-              className="w-6 h-6 text-blue-600 hover:text-blue-800 transition"
+              className="h-5 w-5 transition group-hover:text-[var(--mm-blue)]"
             />
             {unreadCount > 0 && (
-              <span className="w-2.5 h-2.5 bg-red-500 rounded-full absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 shadow-sm"></span>
+                <span className="absolute -right-1 -top-1 min-w-[1.35rem] rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-lg">
+                  {unreadCount}
+                </span>
             )}
-          </button>
+            </button>
 
           {/* Dropdown for Notifications */}
           {isNotifOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border border-blue-100 shadow-lg rounded-md py-2 z-50 max-h-96 overflow-y-auto">
-              <h4 className="px-3 py-2 text-sm font-semibold text-blue-900 border-b">
-                New Orders
-              </h4>
+              <div className="shell-panel absolute right-0 top-[calc(100%+0.9rem)] z-50 w-80 max-w-[calc(100vw-2rem)] p-3">
+                <div className="rounded-2xl bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-4 py-3 text-white shadow-sm">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-100/80">
+                    Live activity
+                  </p>
+                  <h4 className="mt-2 text-base font-semibold text-white">
+                    New Orders
+                  </h4>
+                </div>
 
               {notifications.length > 0 ? (
-                notifications.map((order) => (
-                  <button
-                    key={order._id}
-                    onClick={() => router.push(`/manage/orders`)}
-                    className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm text-gray-700 border-b last:border-none"
-                  >
-                    <p className="font-medium text-blue-800">
-                      {order.customerName || "Guest"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Order #{order._id.slice(-6)} •{" "}
-                      {new Date(order.createdAt).toLocaleTimeString()}
-                    </p>
-                  </button>
-                ))
+                  <div className="mt-3 max-h-96 space-y-2 overflow-y-auto pr-1">
+                    {notifications.map((order) => (
+                      <button
+                        key={order._id}
+                        onClick={() => {
+                          setIsNotifOpen(false);
+                          router.push(`/manage/orders`);
+                        }}
+                        className="w-full rounded-2xl border border-slate-100 bg-white/88 px-4 py-3 text-left text-sm text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50"
+                      >
+                        <p className="font-semibold text-[var(--mm-navy)]">
+                          {order.customerName || "Guest"}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          Order #{order._id.slice(-6)} •{" "}
+                          {new Date(order.createdAt).toLocaleTimeString()}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
               ) : (
-                <p className="px-3 py-2 text-sm text-gray-500">
-                  No new orders
-                </p>
+                  <p className="px-4 py-4 text-sm text-slate-500">
+                    No new orders in the queue right now.
+                  </p>
               )}
-            </div>
+              </div>
           )}
-        </div>
+          </div>
 
         {/* Profile Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center gap-2 focus:outline-none"
-          >
+          <div className="relative">
+            <button
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className="flex items-center gap-3 rounded-full border border-white/80 bg-white/88 py-1.5 pl-2 pr-4 shadow-sm transition hover:shadow-lg"
+            >
             {user?.image ? (
-              <img
+              <Image
                 src={user.image}
                 alt="Profile"
-                className="w-10 h-10 rounded-full object-cover border border-blue-200 shadow-sm"
+                width={40}
+                height={40}
+                unoptimized
+                className="h-10 w-10 rounded-full object-cover border border-white shadow-sm"
               />
             ) : (
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-md text-lg font-semibold">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--mm-blue),var(--mm-navy))] text-lg font-semibold text-white shadow-md">
                 {initials}
               </div>
             )}
-            <span className="hidden sm:block text-sm text-blue-900 font-semibold">
-              {displayName}
-            </span>
-          </button>
+              <div className="hidden text-left sm:block">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+                  Signed in
+                </p>
+                <span className="block text-sm font-semibold text-[var(--mm-ink)]">
+                  {displayName}
+                </span>
+              </div>
+            </button>
 
           {/* Profile Menu */}
           {isProfileOpen && (
-            <div className="absolute right-0 mt-2 w-44 bg-white border border-blue-100 shadow-lg rounded-md py-2 z-50">
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-blue-800 hover:bg-blue-50 transition"
-              >
-                <FontAwesomeIcon icon={faRightFromBracket} />
-                Log Out
-              </button>
-            </div>
+              <div className="shell-panel absolute right-0 top-[calc(100%+0.9rem)] z-50 w-48 p-2">
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 rounded-2xl px-3 py-3 text-sm font-medium text-[var(--mm-navy)] transition hover:bg-blue-50"
+                >
+                  <FontAwesomeIcon icon={faRightFromBracket} />
+                  Log Out
+                </button>
+              </div>
           )}
+          </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }

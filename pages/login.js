@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Playfair_Display, Inter } from "next/font/google";
 
@@ -140,11 +141,16 @@ export default function Login() {
         ></div>
 
         {/* Model image overlay */}
-        <img
-          src="/images/login_model.png"
-          alt="M&M Fashion Model"
-          className="absolute bottom-0 right-0 w-full h-full object-cover opacity-90"
-        />
+        <div className="absolute bottom-0 right-0 w-full h-full">
+          <Image
+            src="/images/login_model.png"
+            alt="M&M Fashion Model"
+            fill
+            priority
+            sizes="50vw"
+            className="object-cover opacity-90"
+          />
+        </div>
 
         {/* Brand overlay text */}
         <div className="absolute z-10 text-center text-white drop-shadow-lg">

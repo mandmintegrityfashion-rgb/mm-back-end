@@ -1,7 +1,9 @@
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import { Transaction } from "@/models/Transactions";
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   await mongooseConnect();
 
   if (req.method !== "GET") {
@@ -26,7 +28,7 @@ export default async function handler(req, res) {
     if (transactionType) filter.transactionType = transactionType;
 
     // --- Aggregate report ---
-    const transactions = await Transaction.find(filter);
+    const transactions = await Transaction.find(filter).lean();
 
     if (!transactions.length) {
       return res.status(200).json({
@@ -112,4 +114,4 @@ export default async function handler(req, res) {
     console.error("Error generating sales report:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-}
+});

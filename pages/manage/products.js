@@ -1,7 +1,7 @@
 // pages/manage/products.js  (or your route file)
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
 import axios from "axios";
@@ -12,15 +12,6 @@ const entriesPerPageDefault = 20;
 
 // --- fetcher for SWR (uses axios so your existing endpoints stay the same)
 const fetcher = (url) => axios.get(url).then((r) => r.data);
-
-// Debounce utility
-function debounce(func, wait) {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
-  };
-}
 
 export default function Products() {
   // SWR-backed product list (cached & revalidated in background)
@@ -79,35 +70,31 @@ export default function Products() {
     else sessionStorage.removeItem("products:highlight");
   }, [highlightedId]);
 
-  // Debounced search over the cached allProducts (safe - products array guarded)
-  const debouncedFilter = useCallback(
-    debounce((term) => {
-      const t = term.trim().toLowerCase();
-      if (!t) {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const term = searchTerm.trim().toLowerCase();
+
+      if (!term) {
         setFilteredProducts(allProducts);
         setVisibleCount(entriesPerPage);
         return;
       }
-      const filtered = (Array.isArray(allProducts) ? allProducts : []).filter((p) =>
-        [
-          p.name,
-          p.barcode,
-          p.description,
-          categoryMap[p.category],
-        ]
+
+      const filtered = (Array.isArray(allProducts) ? allProducts : []).filter((product) =>
+        [product.name, product.barcode, product.description, categoryMap[product.category]]
           .filter(Boolean)
-          .some((field) => String(field).toLowerCase().includes(t))
+          .some((field) => String(field).toLowerCase().includes(term))
       );
+
       setFilteredProducts(filtered);
       setVisibleCount(entriesPerPage);
-    }, 250),
-    [allProducts, categoryMap, entriesPerPage]
-  );
+    }, 250);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, allProducts, categoryMap, entriesPerPage]);
 
   const handleSearchChange = (e) => {
-    const v = e.target.value;
-    setSearchTerm(v);
-    debouncedFilter(v);
+    setSearchTerm(e.target.value);
   };
 
   // Inline edit handlers
@@ -212,6 +199,17 @@ export default function Products() {
   const visibleProducts = Array.isArray(filteredProducts)
     ? filteredProducts.slice(0, visibleCount)
     : [];
+  const visibleProductsCount = Math.min(
+    visibleCount,
+    filteredProducts?.length || 0
+  );
+  const promotionCount = allProducts.filter((product) => product.isPromotion)
+    .length;
+  const lowStockCount = allProducts.filter((product) => {
+    const quantity = Number(product.quantity || 0);
+    const minStock = Number(product.minStock || 0);
+    return quantity <= (minStock > 0 ? minStock : 10);
+  }).length;
 
   // load more helper
   const loadMore = () => {
@@ -232,232 +230,302 @@ export default function Products() {
 
   return (
     <Layout>
-      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
-        <div className="max-w-screen-xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-          <h1 className="text-3xl font-bold text-blue-800">M&M Fashion — Products</h1>
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-[90rem] space-y-6">
+          <section className="shell-panel p-6 lg:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <span className="shell-pill">Catalog control</span>
+                <h1 className="mt-5 text-[var(--mm-ink)]">Product inventory</h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
+                  Manage live stock, promotional pricing, and quick inline edits from the same inventory workspace.
+                </p>
+              </div>
 
-          {/* When linking to product creation, set highlight to newly created product if you want.
-              For edit page navigation, we store highlight in sessionStorage below via onClick handler. */}
-          <Link
-            href="../products/new"
-            className="mt-2 sm:mt-0 inline-block py-2 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition text-center"
-          >
-            + Add Product
-          </Link>
-        </div>
+              <Link
+                href="../products/new"
+                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(29,78,216,0.24)]"
+              >
+                + Add Product
+              </Link>
+            </div>
 
-        {/* Search */}
-        <div className="flex gap-2 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 text-blue-400 w-4 h-4" />
-            <input
-              ref={searchRef}
-              type="text"
-              placeholder="Search products..."
-              className="w-full border border-blue-200 bg-white py-2 pl-9 pr-4 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-          </div>
-        </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <span className="shell-chip">Products: {allProducts.length}</span>
+              <span className="shell-chip">Promotions live: {promotionCount}</span>
+              <span className="shell-chip">Low stock watch: {lowStockCount}</span>
+            </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto rounded-xl shadow-sm border border-blue-100 bg-white">
-          <table className="min-w-full text-sm divide-y divide-blue-100">
-            <thead className="bg-blue-600 text-white text-left">
-              <tr>
-                <th className="p-3"></th>
-                <th className="p-3">Advanced</th>
-                <th className="p-3">Name</th>
-                <th className="p-3">Description</th>
-                <th className="p-3">Cost</th>
-                <th className="p-3">Tax %</th>
-                <th className="p-3">Sale</th>
-                <th className="p-3">Margin</th>
-                <th className="p-3">Barcode</th>
-                <th className="p-3">Properties</th>
-                <th className="p-3">Category</th>
-                <th className="p-3">Promo</th>
-                <th className="p-3">Delete</th>
-              </tr>
-            </thead>
+            <div className="mt-6 grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  placeholder="Search products, categories, or barcodes"
+                  className="w-full !py-3 !pl-11 !pr-4 text-sm"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+              </div>
+              <div className="flex items-center justify-center rounded-full border border-white/80 bg-white/88 px-4 py-3 text-sm font-medium text-slate-600 shadow-sm">
+                Showing {visibleProductsCount} of {filteredProducts.length} matching products
+              </div>
+            </div>
+          </section>
 
-            <tbody className="bg-white divide-y divide-blue-50">
-              {visibleProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={13} className="p-6 text-center text-gray-500 italic">
-                    No products found.
-                  </td>
-                </tr>
-              ) : (
-                visibleProducts.map((p, idx) => {
-                  // calculate the real index inside filteredProducts (useful for editIndex)
-                  const realIndex = idx;
-                  const isHighlighted = highlightedId && highlightedId === p._id;
-                  return (
-                    <tr
-                      key={p._id}
-                      className={`transition cursor-pointer ${expandedRow === realIndex ? "bg-blue-50" : ""} ${
-                        isHighlighted ? "ring-2 ring-blue-200 bg-blue-50" : ""
-                      }`}
-                      onClick={() => setExpandedRow(expandedRow === realIndex ? null : realIndex)}
-                    >
-                      <td className="p-2">
-                        {editIndex === realIndex ? (
-                          <div className="flex flex-col gap-1">
-                            <button
-                              onClick={() => handleUpdateClick(p._id)}
-                              className="w-16 py-1 bg-green-600 text-white rounded text-xs"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={handleCancelClick}
-                              className="w-16 py-1 bg-gray-300 text-gray-700 rounded text-xs"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditClick(realIndex, p);
-                            }}
-                            className="py-1 px-3 border border-blue-500 text-blue-700 hover:bg-blue-500 hover:text-white rounded text-xs"
-                          >
-                            Edit
-                          </button>
-                        )}
-                      </td>
+          <section className="shell-panel overflow-hidden">
+            <div className="flex flex-col gap-2 border-b border-white/80 px-6 py-5 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+                  Inventory table
+                </p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">
+                  Products in catalog
+                </h2>
+              </div>
+              <p className="text-sm text-slate-500">
+                Inline pricing edits stay available alongside the advanced product editor.
+              </p>
+            </div>
 
-                      <td className="p-2">
-                        <Link
-                          href={`/products/edit/${p._id}`}
-                          onClick={() => {
-                            // persist highlight so when returning the row is still highlighted
-                            sessionStorage.setItem("products:highlight", p._id);
-                          }}
-                        >
-                          <button
-                            onClick={(e) => e.stopPropagation()}
-                            className="py-1 px-3 border border-blue-400 text-blue-600 hover:bg-blue-600 hover:text-white rounded text-xs"
-                          >
-                            Advanced
-                          </button>
-                        </Link>
-                      </td>
+            <div className="overflow-x-auto px-3 pb-3 pt-1 sm:px-4">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Quick
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Advanced
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Name
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Description
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Cost
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Tax %
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Sale
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Margin
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Barcode
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Properties
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Category
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Promo
+                    </th>
+                    <th className="whitespace-nowrap bg-transparent px-3 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Delete
+                    </th>
+                  </tr>
+                </thead>
 
-                      <td className="p-2 font-semibold">
-                        {editIndex === realIndex ? (
-                          <input
-                            name="name"
-                            value={editableProduct.name || ""}
-                            onChange={handleChange}
-                            className="w-36 border p-1 rounded text-xs"
-                          />
-                        ) : (
-                          p.name
-                        )}
-                      </td>
-
-                      <td className="p-2 max-w-[150px] truncate">{p.description}</td>
-
-                      <td className="p-2">
-                        {editIndex === realIndex ? (
-                          <input
-                            name="costPrice"
-                            value={editableProduct.costPrice || ""}
-                            onChange={handleChange}
-                            type="number"
-                            className="w-20 border p-1 rounded text-xs"
-                          />
-                        ) : (
-                          formatCurrency(p.costPrice)
-                        )}
-                      </td>
-
-                      <td className="p-2">
-                        {editIndex === realIndex ? (
-                          <input
-                            name="taxRate"
-                            value={editableProduct.taxRate || ""}
-                            onChange={handleChange}
-                            type="number"
-                            className="w-16 border p-1 rounded text-xs"
-                          />
-                        ) : (
-                          p.taxRate
-                        )}
-                      </td>
-
-                      <td className="p-2 text-blue-800 font-semibold">
-                        {editIndex === realIndex ? (
-                          <input
-                            name="salePriceIncTax"
-                            value={editableProduct.salePriceIncTax || ""}
-                            onChange={handleChange}
-                            type="number"
-                            className="w-20 border p-1 rounded text-xs"
-                          />
-                        ) : (
-                          formatCurrency(p.salePriceIncTax)
-                        )}
-                      </td>
-
-                      <td className="p-2">{p.margin}</td>
-                      <td className="p-2">{p.barcode}</td>
-
-                      <td className="p-2 text-gray-600">
-                        {p.properties?.length > 0
-                          ? p.properties.map((pr) => `${pr.propName}: ${pr.propValue}`).join(", ")
-                          : "—"}
-                      </td>
-
-                      <td className="p-2">{categoryMap[p.category] || "—"}</td>
-
-                      <td className="p-2">
-                        {p.isPromotion ? (
-                          <span className="text-green-600 font-semibold">Yes</span>
-                        ) : (
-                          <span className="text-gray-400">No</span>
-                        )}
-                      </td>
-
-                      <td className="p-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(p._id);
-                          }}
-                          className="py-1 px-3 bg-red-50 text-red-700 border border-red-300 hover:bg-red-600 hover:text-white rounded text-xs"
-                        >
-                          Delete
-                        </button>
+                <tbody>
+                  {visibleProducts.length === 0 ? (
+                    <tr>
+                      <td colSpan={13} className="px-3 py-10 text-center text-sm italic text-slate-400">
+                        No products found.
                       </td>
                     </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                  ) : (
+                    visibleProducts.map((p, idx) => {
+                      const realIndex = idx;
+                      const isHighlighted = highlightedId && highlightedId === p._id;
+                      return (
+                        <tr
+                          key={p._id}
+                          className={`cursor-pointer border-t border-white/70 transition ${
+                            expandedRow === realIndex ? "bg-blue-50/55" : "bg-transparent"
+                          } ${isHighlighted ? "bg-blue-50/80 ring-1 ring-blue-100" : ""}`}
+                          onClick={() =>
+                            setExpandedRow(expandedRow === realIndex ? null : realIndex)
+                          }
+                        >
+                          <td className="whitespace-nowrap px-3 py-4 align-top">
+                            {editIndex === realIndex ? (
+                              <div className="flex flex-col gap-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUpdateClick(p._id);
+                                  }}
+                                  className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCancelClick();
+                                  }}
+                                  className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditClick(realIndex, p);
+                                }}
+                                className="rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-[var(--mm-blue)] hover:bg-blue-50"
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </td>
 
-        {/* Load more / Pagination controls */}
-        <div className="flex justify-center items-center mt-6 flex-wrap gap-2">
-          {visibleCount < (filteredProducts?.length || 0) ? (
-            <button
-              onClick={loadMore}
-              className="px-4 py-2 bg-white border border-blue-300 rounded-md hover:bg-blue-50 text-sm"
-            >
-              Load more
-            </button>
-          ) : (
-            <div className="text-sm text-gray-500">End of list</div>
-          )}
-        </div>
+                          <td className="whitespace-nowrap px-3 py-4 align-top">
+                            <Link
+                              href={`/products/edit/${p._id}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                sessionStorage.setItem("products:highlight", p._id);
+                              }}
+                              className="inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-[var(--mm-navy)] hover:border-blue-200 hover:bg-blue-50"
+                            >
+                              Advanced
+                            </Link>
+                          </td>
+
+                          <td className="px-3 py-4 align-top font-semibold text-[var(--mm-navy)]">
+                            {editIndex === realIndex ? (
+                              <input
+                                name="name"
+                                value={editableProduct.name || ""}
+                                onChange={handleChange}
+                                className="w-36 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-none"
+                              />
+                            ) : (
+                              p.name
+                            )}
+                          </td>
+
+                          <td className="max-w-[16rem] px-3 py-4 align-top text-slate-500">
+                            <div className="line-clamp-2">{p.description}</div>
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 align-top text-slate-600">
+                            {editIndex === realIndex ? (
+                              <input
+                                name="costPrice"
+                                value={editableProduct.costPrice || ""}
+                                onChange={handleChange}
+                                type="number"
+                                className="w-24 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-none"
+                              />
+                            ) : (
+                              formatCurrency(p.costPrice)
+                            )}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 align-top text-slate-600">
+                            {editIndex === realIndex ? (
+                              <input
+                                name="taxRate"
+                                value={editableProduct.taxRate || ""}
+                                onChange={handleChange}
+                                type="number"
+                                className="w-20 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-none"
+                              />
+                            ) : (
+                              p.taxRate
+                            )}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 align-top font-semibold text-[var(--mm-navy)]">
+                            {editIndex === realIndex ? (
+                              <input
+                                name="salePriceIncTax"
+                                value={editableProduct.salePriceIncTax || ""}
+                                onChange={handleChange}
+                                type="number"
+                                className="w-24 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-none"
+                              />
+                            ) : (
+                              formatCurrency(p.salePriceIncTax)
+                            )}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 align-top text-slate-600">
+                            {p.margin}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 align-top font-mono text-xs text-slate-500">
+                            {p.barcode || "-"}
+                          </td>
+
+                          <td className="max-w-[16rem] px-3 py-4 align-top text-slate-500">
+                            {p.properties?.length > 0
+                              ? p.properties
+                                  .map((pr) => `${pr.propName}: ${pr.propValue}`)
+                                  .join(", ")
+                              : "No properties"}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 align-top text-slate-600">
+                            {categoryMap[p.category] || "-"}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 align-top">
+                            {p.isPromotion ? (
+                              <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700">
+                                Live
+                              </span>
+                            ) : (
+                              <span className="rounded-full bg-slate-200/70 px-3 py-1 text-xs font-semibold text-slate-500">
+                                Off
+                              </span>
+                            )}
+                          </td>
+
+                          <td className="whitespace-nowrap px-3 py-4 align-top">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(p._id);
+                              }}
+                              className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-600 hover:text-white"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 border-t border-white/70 px-6 py-4">
+              {visibleCount < (filteredProducts?.length || 0) ? (
+                <button
+                  onClick={loadMore}
+                  className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-[var(--mm-navy)] hover:border-blue-200 hover:bg-blue-50"
+                >
+                  Load more
+                </button>
+              ) : (
+                <div className="text-sm text-slate-500">End of catalog list</div>
+              )}
+            </div>
+          </section>
         </div>
       </div>
     </Layout>

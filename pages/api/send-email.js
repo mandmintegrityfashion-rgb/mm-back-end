@@ -1,15 +1,32 @@
 import nodemailer from "nodemailer";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 
-export default async function handler(req, res) {
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+}
+
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
+
   if (req.method !== "POST")
     return res.status(405).json({ message: "Method not allowed" });
 
-  const { to, status, customer } = req.body;
+  const to = String(req.body?.to || "").trim();
+  const status = String(req.body?.status || "").trim();
+  const customer = req.body?.customer;
 
   if (!to || !customer || !status)
     return res
       .status(400)
       .json({ message: "Missing recipient, status or customer info" });
+
+  if (!isValidEmail(to)) {
+    return res.status(400).json({ message: "A valid recipient email is required" });
+  }
+
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    return res.status(500).json({ message: "Email service is not configured" });
+  }
 
   // Dynamic message setup
   let subject, header, message, color;
@@ -135,4 +152,4 @@ export default async function handler(req, res) {
       .status(500)
       .json({ message: "Failed to send email", error: error.message });
   }
-}
+});

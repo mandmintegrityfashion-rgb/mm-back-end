@@ -1,12 +1,14 @@
 // /pages/api/tax/summary.js
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import { Transaction } from "@/models/Transactions";
 import Expense from "@/models/Expense";
 import Product from "@/models/Product";
 
 const n = (v) => (typeof v === "number" && !isNaN(v) ? v : 0);
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
   await mongooseConnect();
@@ -31,6 +33,21 @@ export default async function handler(req, res) {
       Transaction.find(dateFilter).lean(),
       Expense.find(dateFilter).lean().catch(() => []),
     ]);
+
+    const productIds = [
+      ...new Set(
+        (transactions || []).flatMap((transaction) =>
+          (transaction.items || [])
+            .map((item) => item.productId)
+            .filter(Boolean)
+            .map((productId) => productId.toString())
+        )
+      ),
+    ];
+    const products = await Product.find({ _id: { $in: productIds } }).select("costPrice").lean();
+    const productCostMap = Object.fromEntries(
+      products.map((product) => [product._id.toString(), product.costPrice || 0])
+    );
 
     if (!transactions?.length) {
       return res.status(200).json({
@@ -59,10 +76,9 @@ export default async function handler(req, res) {
           const qty = n(item.qty) || n(item.quantity) || 1;
           let cost = 0;
 
-          // Prefer pulling costprice from Product if productId exists
+          // Prefer pulling cost price from Product if productId exists
           if (item.productId) {
-            const product = await Product.findById(item.productId).select("costprice").lean();
-            cost = n(product?.costprice);
+            cost = n(productCostMap[item.productId.toString()]);
           }
 
           // Fallbacks
@@ -136,4 +152,4 @@ export default async function handler(req, res) {
     console.error("❌ /api/tax/summary error:", err);
     res.status(500).json({ error: "Failed to generate tax summary" });
   }
-}
+});

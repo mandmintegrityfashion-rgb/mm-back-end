@@ -1,4 +1,5 @@
 import axios from "axios";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
@@ -428,10 +429,13 @@ export default function ProductForm(props) {
               key={i}
               className="relative w-28 h-28 rounded-md overflow-hidden border"
             >
-              <img
+              <Image
                 src={img.thumb || img.full}
                 alt="Product"
-                className="object-cover w-full h-full"
+                fill
+                unoptimized
+                sizes="112px"
+                className="object-cover"
               />
               <button
                 type="button"

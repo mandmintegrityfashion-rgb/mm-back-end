@@ -48,40 +48,57 @@ export default function Nav({ isOpen, onClose }) {
     };
   }, [router]);
 
-  const baseLink =
-    "px-2 py-4 text-blue-800 transition-all duration-300 flex items-center justify-center flex-col text-xs cursor-pointer hover:text-blue-600 hover:bg-blue-50";
-  const activeLink =
-    "px-2 py-4 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow-md flex items-center justify-center flex-col text-xs";
+  const railItemClass = (isActive) =>
+    `group mx-3 flex w-[calc(100%-1.5rem)] flex-col items-center justify-center rounded-[26px] border px-2 py-4 text-center transition-all duration-300 ${
+      isActive
+        ? "border-transparent bg-[linear-gradient(145deg,var(--mm-navy),var(--mm-blue))] text-white shadow-[0_18px_40px_rgba(29,78,216,0.28)]"
+        : "border-white/75 bg-white/78 text-slate-600 shadow-[0_12px_24px_rgba(15,23,42,0.05)] hover:border-slate-200 hover:bg-white hover:text-[var(--mm-navy)]"
+    }`;
+
+  const subMenuItemClass = (isActive) =>
+    `flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+      isActive
+        ? "bg-[var(--mm-navy)] text-white shadow-[0_12px_28px_rgba(15,23,42,0.22)]"
+        : "text-slate-600 hover:bg-blue-50 hover:text-[var(--mm-navy)]"
+    }`;
 
   const renderMenuItem = (href, icon, label) => (
-    <li key={href} className={pathname === href ? activeLink : baseLink}>
-      <Link href={href} onClick={onClose}>
-        <div className="flex flex-col items-center justify-center">
-          <FontAwesomeIcon icon={icon} className="w-6 h-6 mb-1" />
-          <span className="text-xs">{label}</span>
-        </div>
+    <li key={href}>
+      <Link
+        href={href}
+        onClick={() => {
+          closeMenu();
+          onClose();
+        }}
+        className={railItemClass(pathname === href)}
+      >
+        <FontAwesomeIcon icon={icon} className="h-5 w-5" />
+        <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+          {label}
+        </span>
       </Link>
     </li>
   );
 
-  const renderSubMenu = (items, parentKey) =>
+  const renderSubMenu = (items) =>
     items.map(({ href, label }) => {
       const isActive = pathname === href;
       return (
-        <li
-          key={href}
-          className={`h-[6%] flex items-center px-4 border-b border-blue-100 transition-colors cursor-pointer ${
-            isActive
-              ? "bg-blue-100 text-blue-700 font-semibold"
-              : "text-blue-800 hover:bg-blue-50 hover:text-blue-600"
-          }`}
-          onClick={() => {
-            closeMenu();
-            onClose();
-          }}
-        >
-          <Link href={href} className="w-full h-full flex items-center">
-            {label}
+        <li key={href}>
+          <Link
+            href={href}
+            className={subMenuItemClass(isActive)}
+            onClick={() => {
+              closeMenu();
+              onClose();
+            }}
+          >
+            <span>{label}</span>
+            <span
+              className={`h-2 w-2 rounded-full ${
+                isActive ? "bg-[var(--mm-gold)]" : "bg-slate-300"
+              }`}
+            />
           </Link>
         </li>
       );
@@ -93,7 +110,7 @@ export default function Nav({ isOpen, onClose }) {
     <>
       {/* Mobile Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/40 transition-opacity duration-300 sm:hidden ${
+        className={`fixed inset-0 bg-slate-900/35 backdrop-blur-sm transition-opacity duration-300 sm:hidden ${
           isOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -104,149 +121,154 @@ export default function Nav({ isOpen, onClose }) {
       {/* Sidebar */}
       <aside
         ref={sidebarRef} // ✅ Reference to detect outside clicks
-        className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white border-r border-blue-100 shadow-sm z-20 transform transition-transform duration-300 sm:translate-x-0 w-20 ${
+        className={`fixed left-0 top-20 z-20 h-[calc(100vh-5rem)] w-24 overflow-visible border-r border-white/70 bg-[rgba(248,250,252,0.74)] shadow-[10px_0_40px_rgba(15,23,42,0.07)] backdrop-blur-xl transform transition-transform duration-300 sm:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
         }`}
       >
-        <nav className="mt-8">
-          <ul className="space-y-4">
+        <div className="flex h-full flex-col">
+          <div className="px-3 pt-5">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] text-sm font-semibold uppercase tracking-[0.28em] text-white shadow-[0_18px_34px_rgba(29,78,216,0.2)]">
+              MM
+            </div>
+            <p className="mt-3 text-center text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--mm-muted)]">
+              Control
+            </p>
+          </div>
+
+          <nav className="mt-6 flex-1 overflow-y-auto pb-6">
+            <ul className="space-y-3">
             {renderMenuItem("/", faHome, "Home")}
             {renderMenuItem("/setup/setup", faCog, "Setup")}
 
             {/* Manage */}
-            <li
-              className={
-                isParentActive([
-                  "/manage/products",
-                  "/manage/categories",
-                  "/manage/orders",
-                ])
-                  ? activeLink
-                  : baseLink
-              }
-            >
-              <div
-                className="flex flex-col items-center justify-center cursor-pointer"
+            <li className="relative">
+              <button
+                type="button"
+                className={railItemClass(
+                  isParentActive([
+                    "/manage/products",
+                    "/manage/categories",
+                    "/manage/orders",
+                  ])
+                )}
                 onClick={() => toggleMenu("manage")}
               >
-                <FontAwesomeIcon icon={faList} className="w-6 h-6 mb-1" />
-                <span className="text-xs">Manage</span>
+                <FontAwesomeIcon icon={faList} className="h-5 w-5" />
+                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+                  Manage
+                </span>
                 <FontAwesomeIcon
                   icon={faCaretRight}
-                  className={`w-4 h-4 mt-1 transition-transform duration-300 ${
+                  className={`mt-2 h-3 w-3 transition-transform duration-300 ${
                     openMenu === "manage" ? "rotate-90" : ""
                   }`}
                 />
-              </div>
+              </button>
 
               <ul
-                className={`absolute left-full pt-10 top-0 w-52 bg-white border border-blue-100 h-screen shadow-md transition-all duration-300 ease-in-out z-50 ${
+                className={`absolute left-[calc(100%+0.9rem)] top-0 z-50 w-[min(16rem,calc(100vw-7rem))] rounded-[28px] border border-white/80 bg-white/92 p-3 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 ease-out ${
                   openMenu === "manage"
                     ? "translate-x-0 opacity-100"
-                    : "translate-x-48 opacity-0 pointer-events-none"
+                    : "translate-x-6 opacity-0 pointer-events-none"
                 }`}
               >
-                <div className="text-blue-700 font-semibold px-4 py-3 border-b border-blue-200 bg-blue-50">
+                <div className="mb-3 rounded-[24px] bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-4 py-3 text-sm font-semibold text-white shadow-sm">
                   Manage Section
                 </div>
-                {renderSubMenu(
-                  [
+                <div className="space-y-1.5">
+                  {renderSubMenu([
                     { href: "/manage/products", label: "Product List" },
                     { href: "/manage/categories", label: "Categories" },
                     { href: "/manage/orders", label: "Orders" },
-                  ],
-                  "manage"
-                )}
+                  ])}
+                </div>
               </ul>
             </li>
 
             {/* Reporting */}
-            <li
-              className={
-                isParentActive([
-                  "/reporting/reporting",
-                  "/reporting/completed-Transaction",
-                ])
-                  ? activeLink
-                  : baseLink
-              }
-            >
-              <div
-                className="flex flex-col items-center justify-center cursor-pointer"
+            <li className="relative">
+              <button
+                type="button"
+                className={railItemClass(
+                  isParentActive([
+                    "/reporting/reporting",
+                    "/reporting/completed-Transaction",
+                  ])
+                )}
                 onClick={() => toggleMenu("reporting")}
               >
-                <FontAwesomeIcon icon={faChartLine} className="w-6 h-6 mb-1" />
-                <span className="text-xs">Reports</span>
+                <FontAwesomeIcon icon={faChartLine} className="h-5 w-5" />
+                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+                  Reports
+                </span>
                 <FontAwesomeIcon
                   icon={faCaretRight}
-                  className={`w-4 h-4 mt-1 transition-transform duration-300 ${
+                  className={`mt-2 h-3 w-3 transition-transform duration-300 ${
                     openMenu === "reporting" ? "rotate-90" : ""
                   }`}
                 />
-              </div>
+              </button>
 
               <ul
-                className={`absolute left-full pt-10 top-0 w-52 bg-white border border-blue-100 h-screen shadow-md transition-all duration-300 ease-in-out z-50 ${
+                className={`absolute left-[calc(100%+0.9rem)] top-0 z-50 w-[min(16rem,calc(100vw-7rem))] rounded-[28px] border border-white/80 bg-white/92 p-3 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 ease-out ${
                   openMenu === "reporting"
                     ? "translate-x-0 opacity-100"
-                    : "translate-x-48 opacity-0 pointer-events-none"
+                    : "translate-x-6 opacity-0 pointer-events-none"
                 }`}
               >
-                <div className="text-blue-700 font-semibold px-4 py-3 border-b border-blue-200 bg-blue-50">
+                <div className="mb-3 rounded-[24px] bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-4 py-3 text-sm font-semibold text-white shadow-sm">
                   Reports
                 </div>
-                {renderSubMenu(
-                  [
+                <div className="space-y-1.5">
+                  {renderSubMenu([
                     { href: "/reporting/reporting", label: "Reporting" },
                     {
                       href: "/reporting/completed-Transaction",
                       label: "Completed Transaction",
                     },
-                  ],
-                  "reporting"
-                )}
+                  ])}
+                </div>
               </ul>
             </li>
 
             {/* Expenses */}
-            <li
-              className={
-                isParentActive([
-                  "/expenses/expenses",
-                  "/expenses/analysis",
-                  "/expenses/tax-analysis",
-                  "/expenses/tax-personal",
-                ])
-                  ? activeLink
-                  : baseLink
-              }
-            >
-              <div
-                className="flex flex-col items-center justify-center cursor-pointer"
+            <li className="relative">
+              <button
+                type="button"
+                className={railItemClass(
+                  isParentActive([
+                    "/expenses/expenses",
+                    "/expenses/analysis",
+                    "/expenses/tax-analysis",
+                    "/expenses/tax-personal",
+                  ])
+                )}
                 onClick={() => toggleMenu("expenses")}
               >
-                <FontAwesomeIcon icon={faCoins} className="w-6 h-6 mb-1" />
-                <span className="text-xs">Expenses</span>
+                <FontAwesomeIcon icon={faCoins} className="h-5 w-5" />
+                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+                  Expenses
+                </span>
                 <FontAwesomeIcon
                   icon={faCaretRight}
-                  className={`w-4 h-4 mt-1 transition-transform duration-300 ${
+                  className={`mt-2 h-3 w-3 transition-transform duration-300 ${
                     openMenu === "expenses" ? "rotate-90" : ""
                   }`}
                 />
-              </div>
+              </button>
 
               <ul
-                className={`absolute left-full pt-10 top-0 w-52 bg-white border border-blue-100 h-screen shadow-md transition-all duration-300 ease-in-out z-50 ${
+                className={`absolute left-[calc(100%+0.9rem)] top-0 z-50 w-[min(16rem,calc(100vw-7rem))] rounded-[28px] border border-white/80 bg-white/92 p-3 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 ease-out ${
                   openMenu === "expenses"
                     ? "translate-x-0 opacity-100"
-                    : "translate-x-48 opacity-0 pointer-events-none"
+                    : "translate-x-6 opacity-0 pointer-events-none"
                 }`}
               >
-                <div className="text-blue-700 font-semibold px-4 py-3 border-b border-blue-200 bg-blue-50">
+                <div className="mb-3 rounded-[24px] bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-4 py-3 text-sm font-semibold text-white shadow-sm">
                   Expenses
                 </div>
-                {renderSubMenu(
-                  [
+                <div className="space-y-1.5">
+                  {renderSubMenu([
                     { href: "/expenses/expenses", label: "Expenses Entry" },
                     { href: "/expenses/analysis", label: "Expenses Analysis" },
                     { href: "/expenses/tax-analysis", label: "Tax Analysis" },
@@ -254,19 +276,31 @@ export default function Nav({ isOpen, onClose }) {
                       href: "/expenses/tax-personal",
                       label: "Personal Tax Calculator",
                     },
-                  ],
-                  "expenses"
-                )}
+                  ])}
+                </div>
               </ul>
             </li>
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        </div>
       </aside>
 
       {/* Loading Spinner */}
       {loading && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="w-16 h-16 border-4 border-white border-t-blue-500 rounded-full animate-spin"></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/25 backdrop-blur-sm">
+          <div className="rounded-[28px] border border-white/70 bg-white/78 px-8 py-7 shadow-[0_28px_80px_rgba(15,23,42,0.18)] backdrop-blur-xl">
+            <div className="flex items-center gap-4 text-[var(--mm-navy)]">
+              <div className="h-12 w-12 rounded-full border-4 border-slate-200 border-t-[var(--mm-blue)] animate-spin"></div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+                  Navigating
+                </p>
+                <p className="mt-1 text-sm font-semibold text-[var(--mm-ink)]">
+                  Loading workspace view
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </>

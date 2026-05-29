@@ -1,9 +1,11 @@
 // pages/api/expenses/analysis.js
 import PDFDocument from "pdfkit";
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import Expense from "@/models/Expense";
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method not allowed" });
   }
@@ -120,4 +122,4 @@ export default async function handler(req, res) {
     console.error("PDF generation error:", error);
     res.status(500).json({ message: "Failed to generate PDF" });
   }
-}
+});

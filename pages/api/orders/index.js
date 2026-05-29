@@ -1,76 +1,59 @@
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import Order from "@/models/Order";
 import mongoose from "mongoose";
-import Customer from "@/models/Customer";
 
-export default async function handler(req, res) {
-  await mongooseConnect();
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
-  if (req.method === "GET") {
-    const { page = 1, limit = 10, search = "" } = req.query;
-
-    try {
-      let query = {};
-
-      // 🔍 Search logic (by ID or customer fields)
-      if (search) {
-        if (mongoose.Types.ObjectId.isValid(search)) {
-          query = { _id: search };
-        } else {
-          query = {
-            $or: [
-              { "shippingDetails.name": { $regex: search, $options: "i" } },
-              { "shippingDetails.email": { $regex: search, $options: "i" } },
-              { "shippingDetails.phone": { $regex: search, $options: "i" } },
-            ],
-          };
-        }
-      }
-
-      // 🔹 Count and paginate
-      const total = await Order.countDocuments(query);
-      const totalPages = Math.ceil(total / limit);
-
-      // 🔹 Fetch orders and populate customer reference
-      const orders = await Order.find(query)
-        .populate("customer") // ✅ This is the key change
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(Number(limit))
-        .lean(); // Converts to plain objects for better performance
-
-      return res.status(200).json({
-        orders,
-        totalPages,
-        total,
-      });
-    } catch (error) {
-      console.error("❌ Failed to fetch orders:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-
-  // 🔹 Update order status
-  else if (req.method === "PUT") {
-    try {
-      const { id } = req.query;
-      const { status } = req.body;
-
-      const order = await Order.findById(id);
-      if (!order) return res.status(404).json({ error: "Order not found" });
-
-      order.status = status;
-      await order.save();
-
-      return res.status(200).json(order.toObject());
-    } catch (error) {
-      console.error("❌ Failed to update order:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-
-  // 🔹 Invalid method
-  else {
+export default withSessionRoute(async function handler(req, res) {
+  if (req.method !== "GET") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
-}
+
+  requireAdminSession(req);
+  await mongooseConnect();
+
+  const page = Math.max(Number(req.query?.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query?.limit) || 10, 1), 100);
+  const search = String(req.query?.search || "").trim();
+
+  try {
+    let query = {};
+
+    if (search) {
+      if (mongoose.Types.ObjectId.isValid(search)) {
+        query = { _id: search };
+      } else {
+        const searchRegex = new RegExp(escapeRegex(search), "i");
+        query = {
+          $or: [
+            { "shippingDetails.name": searchRegex },
+            { "shippingDetails.email": searchRegex },
+            { "shippingDetails.phone": searchRegex },
+          ],
+        };
+      }
+    }
+
+    const total = await Order.countDocuments(query);
+    const totalPages = Math.max(Math.ceil(total / limit), 1);
+
+    const orders = await Order.find(query)
+      .populate("customer")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    return res.status(200).json({
+      orders,
+      totalPages,
+      total,
+    });
+  } catch (error) {
+    console.error("❌ Failed to fetch orders:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});

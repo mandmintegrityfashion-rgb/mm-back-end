@@ -1,17 +1,19 @@
 // pages/api/expenses/index.js
 
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import Expense from "@/models/Expense";
-import ExpenseCategory from "@/models/ExpenseCategory"; // Make sure this is imported
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   await mongooseConnect();
 
   if (req.method === "GET") {
     try {
       const expenses = await Expense.find()
         .populate("category", "name") // Populate category name
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
 
       return res.status(200).json(expenses);
     } catch (err) {
@@ -45,4 +47,4 @@ export default async function handler(req, res) {
 
 
   return res.status(405).json({ error: "Method not allowed" });
-}
+});

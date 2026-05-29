@@ -119,181 +119,205 @@ export default function PromotionManagement() {
   };
 
   return (
-    <div className="min-h-full bg-gradient-to-b from-white to-blue-50 p-6">
-      {/* Header */}
-      <div className="w-full border-b border-blue-100 p-4 mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 tracking-tight">
-            M&M Fashion — Promotions
-          </h2>
+    <div className="space-y-6">
+      <section className="shell-panel p-6 lg:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <span className="shell-pill">Promotion desk</span>
+            <h2 className="mt-5 text-[var(--mm-ink)]">Promotions</h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              Review active markdowns, adjust promo pricing inline, and launch a new promotional product without leaving setup.
+            </p>
+          </div>
           <button
             onClick={openModal}
-            className="py-2 px-5 sm:px-6 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+            className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]"
           >
             + Add Promotion
           </button>
         </div>
 
-        {/* Search */}
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-3">
-          <div className="w-full relative sm:w-2/3">
-            <Search className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
+        <div className="mt-6 flex flex-wrap gap-3">
+          <span className="shell-chip">Active promos: {promotions.length}</span>
+          <span className="shell-chip">Inline pricing enabled</span>
+        </div>
+
+        <div className="mt-6 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search promotions..."
-              className="w-full py-2.5 pl-10 pr-4 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full !py-3 !pl-11 !pr-4 text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button
             onClick={handleSearch}
-            className="py-2 px-6 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[var(--mm-blue)] hover:bg-blue-50"
           >
             Search
           </button>
         </div>
-      </div>
+      </section>
 
-      {/* Table */}
-      <div className="overflow-x-auto shadow-md rounded-lg bg-white">
-        <table className="min-w-full border border-blue-100 text-sm text-gray-700">
-          <thead className="bg-blue-600 text-white">
-            <tr>
-              <th className="p-4 text-left">Product</th>
-              <th className="p-4 text-left">Promo Price</th>
-              <th className="p-4 text-left">Active</th>
-              <th className="p-4 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-blue-50">
-            {promotions.length > 0 ? (
-              promotions.map((promo, index) => (
-                <tr
-                  key={promo._id}
-                  className="hover:bg-blue-50 transition duration-150"
-                >
-                  <td className="p-4 font-semibold text-gray-800">
-                    {promo.name}
-                  </td>
-                  <td className="p-4">
-                    {editIndex === index ? (
-                      <input
-                        name="promoPrice"
-                        value={editablePromotion.promoPrice || ""}
-                        onChange={handleChange}
-                        type="number"
-                        className="w-32 border border-blue-300 p-2 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400"
-                      />
-                    ) : (
-                      `₦${promo.promoPrice || "-"}`
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <span className="text-green-600 font-semibold">Active</span>
-                  </td>
-                  <td className="p-4 flex gap-2">
-                    {editIndex === index ? (
-                      <>
-                        <button
-                          onClick={() => handleUpdateClick(promo._id)}
-                          className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={handleCancelClick}
-                          className="px-4 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleEditClick(index, promo)}
-                          className="px-4 py-1 border border-blue-400 text-blue-700 rounded hover:bg-blue-600 hover:text-white transition"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(promo._id)}
-                          className="px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                        >
-                          Remove
-                        </button>
-                      </>
-                    )}
+      <section className="shell-panel overflow-hidden">
+        <div className="flex flex-col gap-2 border-b border-white/80 px-6 py-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+              Promotion list
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">
+              Live promotional products
+            </h2>
+          </div>
+          <p className="text-sm text-slate-500">Edit promo price inline or remove a product from the campaign set.</p>
+        </div>
+
+        <div className="overflow-x-auto px-3 pb-3 pt-1 sm:px-4">
+          <table className="min-w-full text-sm text-slate-700">
+            <thead>
+              <tr>
+                <th className="bg-transparent p-4 text-left text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Product</th>
+                <th className="bg-transparent p-4 text-left text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Promo Price</th>
+                <th className="bg-transparent p-4 text-left text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Active</th>
+                <th className="bg-transparent p-4 text-left text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {promotions.length > 0 ? (
+                promotions.map((promo, index) => (
+                  <tr
+                    key={promo._id}
+                    className="border-t border-white/70 transition hover:bg-blue-50/45"
+                  >
+                    <td className="p-4 font-semibold text-[var(--mm-navy)]">
+                      {promo.name}
+                    </td>
+                    <td className="p-4">
+                      {editIndex === index ? (
+                        <input
+                          name="promoPrice"
+                          value={editablePromotion.promoPrice || ""}
+                          onChange={handleChange}
+                          type="number"
+                          className="w-36 !py-2 text-sm"
+                        />
+                      ) : (
+                        `₦${promo.promoPrice || "-"}`
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        Active
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex flex-wrap gap-2">
+                        {editIndex === index ? (
+                          <>
+                            <button
+                              onClick={() => handleUpdateClick(promo._id)}
+                              className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={handleCancelClick}
+                              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleEditClick(index, promo)}
+                              className="rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-[var(--mm-blue)] hover:bg-blue-50"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(promo._id)}
+                              className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-600 hover:text-white"
+                            >
+                              Remove
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="p-10 text-center text-slate-500">
+                    No active promotions found.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="4" className="p-6 text-center text-gray-500">
-                  No active promotions found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4">
-          <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md sm:max-w-lg max-h-[80vh] overflow-y-auto">
-            <h3 className="text-2xl font-semibold text-blue-800 mb-4">
-              Add New Promotion
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+          <div className="shell-panel w-full max-w-lg p-6 lg:p-8">
+            <span className="shell-pill">New promotion</span>
+            <h3 className="mt-5 text-2xl font-semibold text-[var(--mm-ink)]">
+              Add new promotion
             </h3>
 
-            {/* Product List */}
-            <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-700">
-                Select Product
-              </label>
-              <select
-                className="border w-full p-2 rounded-md border-blue-200 focus:ring-1 focus:ring-blue-400"
-                value={selectedProduct?._id || ""}
-                onChange={(e) => {
-                  const prod = allProducts.find(
-                    (p) => p._id === e.target.value
-                  );
-                  setSelectedProduct(prod);
-                }}
-              >
-                <option value="">-- Choose Product --</option>
-                {allProducts.map((prod) => (
-                  <option key={prod._id} value={prod._id}>
-                    {prod.name} (₦{prod.salePriceIncTax})
-                  </option>
-                ))}
-              </select>
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-[var(--mm-navy)]">
+                  Select Product
+                </label>
+                <select
+                  className="w-full !py-3"
+                  value={selectedProduct?._id || ""}
+                  onChange={(e) => {
+                    const prod = allProducts.find(
+                      (p) => p._id === e.target.value
+                    );
+                    setSelectedProduct(prod);
+                  }}
+                >
+                  <option value="">-- Choose Product --</option>
+                  {allProducts.map((prod) => (
+                    <option key={prod._id} value={prod._id}>
+                      {prod.name} (₦{prod.salePriceIncTax})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-[var(--mm-navy)]">
+                  Promo Price
+                </label>
+                <input
+                  type="number"
+                  className="w-full !py-3"
+                  value={promoPrice}
+                  onChange={(e) => setPromoPrice(e.target.value)}
+                />
+              </div>
             </div>
 
-            {/* Promo Price */}
-            <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-700">
-                Promo Price
-              </label>
-              <input
-                type="number"
-                className="border w-full p-2 rounded-md border-blue-200 focus:ring-1 focus:ring-blue-400"
-                value={promoPrice}
-                onChange={(e) => setPromoPrice(e.target.value)}
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row justify-end gap-2">
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
               <button
                 onClick={closeModal}
-                className="py-2 px-4 rounded-lg bg-gray-400 text-white hover:bg-gray-500"
+                className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSavePromotion}
-                className="py-2 px-4 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                className="rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]"
               >
                 Save Promotion
               </button>

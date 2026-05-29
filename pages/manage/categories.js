@@ -1,6 +1,7 @@
 "use client";
 
 import Layout from "@/components/Layout";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Loader from "@/components/Loader";
@@ -160,37 +161,64 @@ export default function Categories() {
   const filteredCategories = categories.filter((cat) =>
     cat.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const rootCategoryCount = categories.filter((cat) => !cat.parent).length;
+  const propertySetCount = categories.reduce(
+    (sum, cat) => sum + (cat.properties?.length || 0),
+    0
+  );
 
   return (
     <Layout>
-      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
-        <div className="max-w-screen-xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-            <h1 className="text-3xl font-bold text-blue-800">
-              M&M Fashion — Categories
-            </h1>
-            <input
-              type="text"
-              placeholder="Search categories..."
-              className="border border-blue-200 rounded-lg px-4 py-2 w-full sm:w-64 mt-4 sm:mt-0 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-[90rem] space-y-6">
+          <section className="shell-panel p-6 lg:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <span className="shell-pill">Category system</span>
+                <h1 className="mt-5 text-[var(--mm-ink)]">Categories and attributes</h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
+                  Structure the catalog hierarchy, upload visual identifiers, and keep reusable property sets organized for editing.
+                </p>
+              </div>
 
-          {/* Add / Edit Category — Single Form */}
-          <div className={`bg-white p-6 rounded-xl shadow-sm border ${editingId ? "border-blue-300 ring-2 ring-blue-100" : "border-blue-100"}`}>
+              <div className="w-full max-w-sm">
+                <input
+                  type="text"
+                  placeholder="Search categories..."
+                  className="w-full !py-3 text-sm"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <span className="shell-chip">Categories: {categories.length}</span>
+              <span className="shell-chip">Root groups: {rootCategoryCount}</span>
+              <span className="shell-chip">Property entries: {propertySetCount}</span>
+            </div>
+          </section>
+
+          <section
+            className={`shell-panel p-6 lg:p-8 ${
+              editingId ? "ring-1 ring-blue-200" : ""
+            }`}
+          >
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="flex items-center justify-between border-b pb-3">
-                <h2 className="text-lg font-semibold text-blue-700">
-                  {editingId ? "Edit Category" : "Add New Category"}
-                </h2>
+              <div className="flex flex-col gap-3 border-b border-white/80 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+                    Category editor
+                  </p>
+                  <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">
+                    {editingId ? "Edit category" : "Add new category"}
+                  </h2>
+                </div>
                 {editingId && (
                   <button
                     type="button"
                     onClick={cancelEdit}
-                    className="text-sm text-gray-500 hover:text-red-500 transition"
+                    className="inline-flex w-fit rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
                   >
                     Cancel Editing
                   </button>
@@ -199,7 +227,7 @@ export default function Categories() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-blue-700 mb-1">
+                  <label className="mb-2 block text-sm font-medium text-[var(--mm-navy)]">
                     Category Name
                   </label>
                   <input
@@ -207,18 +235,18 @@ export default function Categories() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter category name"
-                    className="w-full border border-blue-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
+                    className="w-full !py-3"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-blue-700 mb-1">
+                  <label className="mb-2 block text-sm font-medium text-[var(--mm-navy)]">
                     Parent Category
                   </label>
                   <select
                     value={parentCategory}
                     onChange={(e) => setParentCategory(e.target.value)}
-                    className="w-full border border-blue-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
+                    className="w-full !py-3"
                   >
                     <option value="">No Parent</option>
                     {categories
@@ -234,11 +262,11 @@ export default function Categories() {
 
               {/* Image Upload */}
               <div>
-                <label className="block text-sm font-medium text-blue-700 mb-2">
+                <label className="mb-3 block text-sm font-medium text-[var(--mm-navy)]">
                   Images
                 </label>
                 <div className="flex flex-wrap gap-3 items-center">
-                  <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition text-sm">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]">
                     + Upload Images
                     <input
                       type="file"
@@ -251,15 +279,18 @@ export default function Categories() {
                   {loading && <Loader />}
                   {images.map((img, i) => (
                     <div key={i} className="relative group">
-                      <img
+                      <Image
                         src={img.thumb || img.full}
-                        className="w-16 h-16 object-cover rounded-lg border border-blue-100"
-                        alt=""
+                        width={64}
+                        height={64}
+                        unoptimized
+                        className="h-16 w-16 rounded-2xl border border-white object-cover shadow-sm"
+                        alt="Category"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
-                        className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                        className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-xs text-white opacity-0 transition group-hover:opacity-100"
                       >
                         ✕
                       </button>
@@ -270,7 +301,7 @@ export default function Categories() {
 
               {/* Properties */}
               <div>
-                <label className="block text-sm font-medium text-blue-700 mb-2">
+                <label className="mb-3 block text-sm font-medium text-[var(--mm-navy)]">
                   Properties
                 </label>
                 {properties.map((prop, idx) => (
@@ -282,7 +313,7 @@ export default function Categories() {
                       onChange={(e) =>
                         handlePropertyChange(idx, "propName", e.target.value)
                       }
-                      className="flex-1 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                      className="flex-1 !py-3 text-sm"
                     />
                     <input
                       type="text"
@@ -291,12 +322,12 @@ export default function Categories() {
                       onChange={(e) =>
                         handlePropertyChange(idx, "propValue", e.target.value)
                       }
-                      className="flex-1 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                      className="flex-1 !py-3 text-sm"
                     />
                     <button
                       type="button"
                       onClick={() => removeProperty(idx)}
-                      className="text-red-500 hover:text-red-700 text-sm px-2"
+                      className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-600 hover:text-white"
                     >
                       Remove
                     </button>
@@ -305,7 +336,7 @@ export default function Categories() {
                 <button
                   type="button"
                   onClick={addProperty}
-                  className="text-sm text-blue-600 hover:text-blue-800 mt-1"
+                  className="mt-2 inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[var(--mm-blue)] hover:bg-blue-50"
                 >
                   + Add Property
                 </button>
@@ -314,7 +345,7 @@ export default function Categories() {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                  className="rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]"
                 >
                   {editingId ? "Update Category" : "Save Category"}
                 </button>
@@ -322,45 +353,63 @@ export default function Categories() {
                   <button
                     type="button"
                     onClick={cancelEdit}
-                    className="px-6 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition text-sm"
+                    className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
                   >
                     Cancel
                   </button>
                 )}
               </div>
             </form>
-          </div>
+          </section>
 
           {/* Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-x-auto">
-            <table className="min-w-full text-sm text-left">
-              <thead className="bg-blue-50 text-blue-700 font-medium">
+          <section className="shell-panel overflow-hidden">
+            <div className="flex flex-col gap-2 border-b border-white/80 px-6 py-5 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+                  Category library
+                </p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">
+                  All saved categories
+                </h2>
+              </div>
+              <p className="text-sm text-slate-500">
+                Search and edit hierarchy rules without leaving the screen.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto px-3 pb-3 pt-1 sm:px-4">
+              <table className="min-w-full text-left text-sm">
+                <thead>
                 <tr>
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Parent</th>
-                  <th className="p-3">Images</th>
-                  <th className="p-3">Properties</th>
-                  <th className="p-3 text-center">Actions</th>
+                  <th className="bg-transparent p-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Name</th>
+                  <th className="bg-transparent p-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Parent</th>
+                  <th className="bg-transparent p-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Images</th>
+                  <th className="bg-transparent p-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Properties</th>
+                  <th className="bg-transparent p-3 text-center text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCategories.map((cat) => (
                   <tr
                     key={cat._id}
-                    className={`border-b hover:bg-blue-50/50 transition ${
-                      editingId === cat._id ? "bg-blue-50 ring-1 ring-blue-200" : ""
+                    className={`border-t border-white/70 transition ${
+                      editingId === cat._id ? "bg-blue-50/70 ring-1 ring-blue-100" : "hover:bg-blue-50/45"
                     }`}
                   >
-                    <td className="p-3 font-medium text-gray-800">{cat.name}</td>
-                    <td className="p-3 text-gray-600">{cat.parent?.name || "—"}</td>
+                    <td className="p-3 font-medium text-[var(--mm-navy)]">{cat.name}</td>
+                    <td className="p-3 text-slate-500">{cat.parent?.name || "-"}</td>
                     <td className="p-3">
                       <div className="flex gap-1.5">
                         {cat.images?.map((img, j) => (
-                          <img
+                          <Image
                             key={j}
                             src={img.thumb || img.full}
-                            className="w-10 h-10 object-cover rounded-md border border-blue-100"
-                            alt=""
+                            width={40}
+                            height={40}
+                            unoptimized
+                            className="h-10 w-10 rounded-xl border border-white object-cover shadow-sm"
+                            alt={cat.name}
                           />
                         ))}
                       </div>
@@ -370,7 +419,7 @@ export default function Categories() {
                         {(cat.properties || []).map((p, k) => (
                           <span
                             key={k}
-                            className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded border border-blue-100"
+                            className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
                           >
                             {p.propName}: {p.propValue}
                           </span>
@@ -381,13 +430,13 @@ export default function Categories() {
                       <div className="flex justify-center gap-2">
                         <button
                           onClick={() => handleEditClick(cat)}
-                          className="text-xs px-3 py-1 border border-blue-300 text-blue-700 rounded-md hover:bg-blue-600 hover:text-white transition"
+                          className="rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-[var(--mm-blue)] hover:bg-blue-50"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(cat._id)}
-                          className="text-xs px-3 py-1 border border-red-300 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition"
+                          className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-600 hover:text-white"
                         >
                           Delete
                         </button>
@@ -397,14 +446,15 @@ export default function Categories() {
                 ))}
                 {filteredCategories.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="p-6 text-center text-gray-400 italic">
+                    <td colSpan="5" className="p-10 text-center italic text-slate-400">
                       No categories found
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          </div>
+            </div>
+          </section>
         </div>
       </div>
     </Layout>

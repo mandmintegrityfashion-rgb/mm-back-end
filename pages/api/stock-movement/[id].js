@@ -1,8 +1,10 @@
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import { StockMovement } from "@/models/StockMovement";
 import mongoose from "mongoose"; // add this
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   await mongooseConnect();
 
   const { id } = req.query;
@@ -26,14 +28,14 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         _id: movement._id,
-        transRef: movement._id.toString().slice(-4).padStart(4, "0"),
+        transRef: movement.transRef || movement._id.toString().slice(-4).padStart(4, "0"),
         fromLocation: movement.fromLocation,
         toLocation: movement.toLocation,
         reason: movement.reason,
         staff: movement.staff,
         dateSent: movement.createdAt,
         dateReceived: movement.updatedAt,
-        status: "Received",
+        status: movement.status || "Received",
         totalCostPrice,
         products: movement.products,
       });
@@ -44,4 +46,4 @@ export default async function handler(req, res) {
   }
 
   return res.status(405).json({ message: "Method not allowed" });
-}
+});

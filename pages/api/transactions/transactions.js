@@ -1,22 +1,18 @@
-import mongoose from "mongoose";
+import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import { Transaction } from "@/models/Transactions";
-import Staff from "@/models/Staff"; // ✅ Add this line
 
-async function connectDB() {
-  if (mongoose.connection.readyState === 1) return;
-  await mongoose.connect(process.env.MONGODB_URI);
-}
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
 
-export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
-      await connectDB();
+      await mongooseConnect();
 
-      // Fetch all transactions and populate the staff field with name
       const transactions = await Transaction
-  .find()
-  .sort({ createdAt: -1 }) // ✅ Sort by newest first
-  .populate("staff", "name");
+        .find()
+        .sort({ createdAt: -1 })
+        .lean();
 
 
       return res.status(200).json({ success: true, transactions });
@@ -28,4 +24,4 @@ export default async function handler(req, res) {
     res.setHeader("Allow", ["GET"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-}
+});

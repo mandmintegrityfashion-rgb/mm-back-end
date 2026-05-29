@@ -77,84 +77,116 @@ export default function StaffPage() {
     }
   };
 
+  const managerCount = staffList.filter((staff) => staff.role === "manager").length;
+  const staffCount = staffList.filter((staff) => staff.role === "staff").length;
+
   return (
     <Layout>
-      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
-        <div className="max-w-screen-xl mx-auto space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-3xl font-bold text-blue-800">M&M Fashion — Staff</h1>
-          <p className="text-gray-500 text-sm mt-1 sm:mt-0">
-            Manage all your staff accounts easily
-          </p>
-        </div>
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-[90rem] space-y-6">
+          <section className="shell-panel p-6 lg:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <span className="shell-pill">Team access</span>
+                <h1 className="mt-5 text-[var(--mm-ink)]">Staff accounts</h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
+                  Create and maintain staff credentials from a cleaner admin surface with faster role visibility.
+                </p>
+              </div>
 
-        {/* Add Staff Section */}
-        <div className="bg-white shadow-sm rounded-xl p-6 mb-10 border border-blue-100">
-          <h2 className="text-lg font-semibold text-blue-700 mb-4">
-            Add New Staff Member
-          </h2>
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-4 gap-4"
-          >
-            <input
-              name="name"
-              placeholder="Full Name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="border border-blue-200 focus:border-blue-500 px-3 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-200 transition"
-            />
-            <input
-              name="username"
-              placeholder="Username"
-              value={formData.username}
-              onChange={handleInputChange}
-              className="border border-blue-200 focus:border-blue-500 px-3 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-200 transition"
-            />
-            <input
-              name="password"
-              placeholder="Password"
-              type="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className="border border-blue-200 focus:border-blue-500 px-3 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-200 transition"
-            />
-            <button
-              type="submit"
-              className="bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-4 rounded-md transition"
+              <div className="flex flex-wrap gap-3">
+                <span className="shell-chip">Total team: {staffList.length}</span>
+                <span className="shell-chip">Managers: {managerCount}</span>
+                <span className="shell-chip">Staff: {staffCount}</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="shell-panel p-6 lg:p-8">
+            <div className="mb-5 flex flex-col gap-2 border-b border-white/80 pb-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+                  New account
+                </p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">
+                  Add new staff member
+                </h2>
+              </div>
+              <p className="text-sm text-slate-500">Passwords are stored securely after submission.</p>
+            </div>
+
+            <form
+              onSubmit={handleSubmit}
+              className="grid grid-cols-1 gap-4 md:grid-cols-4"
             >
-              Add Staff
-            </button>
-          </form>
-        </div>
+              <input
+                name="name"
+                placeholder="Full Name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className="!py-3"
+              />
+              <input
+                name="username"
+                placeholder="Username"
+                value={formData.username}
+                onChange={handleInputChange}
+                className="!py-3"
+              />
+              <input
+                name="password"
+                placeholder="Password"
+                type="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                className="!py-3"
+              />
+              <button
+                type="submit"
+                className="rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)]"
+              >
+                Add Staff
+              </button>
+            </form>
+          </section>
 
-        {/* Staff List Section */}
-        <div className="overflow-x-auto bg-white shadow-sm rounded-xl border border-blue-100">
+          <section className="shell-panel overflow-hidden">
+            <div className="flex flex-col gap-2 border-b border-white/80 px-6 py-5 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+                  Team roster
+                </p>
+                <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">
+                  Existing staff accounts
+                </h2>
+              </div>
+              <p className="text-sm text-slate-500">Edit names, usernames, and roles inline.</p>
+            </div>
+
+            <div className="overflow-x-auto px-3 pb-3 pt-1 sm:px-4">
           {loading ? (
-            <div className="flex justify-center items-center h-48">
-              <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex h-48 items-center justify-center">
+              <div className="h-10 w-10 rounded-full border-4 border-slate-200 border-t-[var(--mm-blue)] animate-spin"></div>
             </div>
           ) : staffList.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">
+            <p className="py-10 text-center text-slate-500">
               No staff members found.
             </p>
           ) : (
             <table className="min-w-full text-sm text-left">
-              <thead className="bg-blue-50 text-blue-800 font-semibold">
+              <thead>
                 <tr>
-                  <th className="py-3 px-4">Name</th>
-                  <th className="py-3 px-4">Username</th>
-                  <th className="py-3 px-4">Role</th>
-                  <th className="py-3 px-4 text-center">Actions</th>
+                  <th className="bg-transparent px-4 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Name</th>
+                  <th className="bg-transparent px-4 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Username</th>
+                  <th className="bg-transparent px-4 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Role</th>
+                  <th className="bg-transparent px-4 py-4 text-center text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {staffList.map((staff, index) => (
                   <tr
                     key={staff._id}
-                    className={`${
-                      index % 2 === 0 ? "bg-white" : "bg-blue-50"
-                    } border-t border-blue-100 hover:bg-blue-100/40`}
+                    className={`${index % 2 === 0 ? "bg-transparent" : "bg-blue-50/25"} border-t border-white/70 hover:bg-blue-50/45`}
                   >
                     <td className="py-3 px-4">
                       {editingId === staff._id ? (
@@ -162,10 +194,10 @@ export default function StaffPage() {
                           name="name"
                           value={editData.name}
                           onChange={handleEditChange}
-                          className="border border-blue-200 px-2 py-1 rounded-md w-full"
+                          className="w-full !py-2 text-sm"
                         />
                       ) : (
-                        <span className="font-medium text-gray-800">
+                        <span className="font-medium text-[var(--mm-navy)]">
                           {staff.name}
                         </span>
                       )}
@@ -176,10 +208,10 @@ export default function StaffPage() {
                           name="username"
                           value={editData.username}
                           onChange={handleEditChange}
-                          className="border border-blue-200 px-2 py-1 rounded-md w-full"
+                          className="w-full !py-2 text-sm"
                         />
                       ) : (
-                        <span className="text-gray-700">{staff.username}</span>
+                        <span className="text-slate-600">{staff.username}</span>
                       )}
                     </td>
                     <td className="py-3 px-4">
@@ -188,13 +220,13 @@ export default function StaffPage() {
                           name="role"
                           value={editData.role}
                           onChange={handleEditChange}
-                          className="border border-blue-200 px-2 py-1 rounded-md w-full"
+                          className="w-full !py-2 text-sm"
                         >
                           <option value="staff">Staff</option>
                           <option value="manager">Manager</option>
                         </select>
                       ) : (
-                        <span className="capitalize text-blue-700 font-medium">
+                        <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold capitalize text-blue-700">
                           {staff.role}
                         </span>
                       )}
@@ -204,13 +236,13 @@ export default function StaffPage() {
                         <div className="flex justify-center gap-2">
                           <button
                             onClick={() => saveEdit(staff._id)}
-                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md"
+                            className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
                           >
                             Save
                           </button>
                           <button
                             onClick={cancelEditing}
-                            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-1 rounded-md"
+                            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
                           >
                             Cancel
                           </button>
@@ -218,7 +250,7 @@ export default function StaffPage() {
                       ) : (
                         <button
                           onClick={() => startEditing(staff)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md transition"
+                          className="rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-[var(--mm-blue)] hover:bg-blue-50"
                         >
                           Edit
                         </button>
@@ -229,7 +261,8 @@ export default function StaffPage() {
               </tbody>
             </table>
           )}
-        </div>
+            </div>
+          </section>
         </div>
       </div>
     </Layout>

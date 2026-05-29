@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import Layout from "@/components/Layout";
 import { motion, AnimatePresence } from "framer-motion";
@@ -192,6 +193,8 @@ export default function HeroSetup() {
     setCurrentIndex((prev) => (prev === heroPages.length - 1 ? 0 : prev + 1));
 
   const currentHero = heroPages[currentIndex] || {};
+  const activeHeroCount = heroPages.filter((hero) => hero.status === "active")
+    .length;
   const bind = useDrag(
     ({ down, movement: [mx], direction: [xDir], distance, velocity }) => {
       if (!down && distance > 100 && velocity > 0.2)
@@ -201,205 +204,268 @@ export default function HeroSetup() {
 
   return (
     <Layout>
-      <div className="min-h-[100vh] flex flex-col items-center pb-6 pt-6 px-4 space-y-12 bg-gradient-to-b from-blue-50 to-white">
-        {/* Hero Carousel */}
-        <div className="relative w-full max-w-6xl">
-          {heroPages.length === 0 ? (
-            <p className="text-blue-400 italic text-center">No Hero Pages Yet</p>
-          ) : (
-            <div className="relative rounded-2xl overflow-hidden shadow-xl border border-blue-100">
-              <AnimatePresence mode="wait">
-                {currentHero && (
-                  <motion.section
-                    key={currentHero._id}
-                    {...bind()}
-                    initial={{ opacity: 0, x: 200 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -200 }}
-                    transition={{ duration: 0.5 }}
-                    className="relative w-full h-[420px] flex items-center justify-center bg-blue-100 overflow-hidden rounded-2xl"
-                  >
-                    {/* Background */}
-                    <div className="absolute inset-0 overflow-hidden">
-                      {currentHero.bgImage?.[0]?.full ? (
-                        <img
-                          src={currentHero.bgImage[0].full}
-                          alt="Hero background"
-                          className="w-full h-full object-cover scale-105 blur-sm brightness-95 transition-all duration-700"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-blue-100 animate-pulse" />
-                      )}
-                      <div className="absolute inset-0 bg-blue-950/30" />
-                    </div>
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-[90rem] space-y-8">
+          <section className="shell-panel p-6 lg:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <span className="shell-pill">Campaign studio</span>
+                <h1 className="mt-5 text-[var(--mm-ink)]">Hero and promotion setup</h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
+                  Curate storefront campaigns, upload optimized hero art, and manage promotional pricing from one setup workspace.
+                </p>
+              </div>
 
-                    {/* Content */}
-                    <div className="relative flex flex-col md:flex-row items-center justify-between max-w-4xl mx-auto px-6 w-full text-white">
-                      <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="hidden md:flex flex-1 justify-center md:justify-start"
-                      >
-                        <img
-                          src={
-                            currentHero.image?.[0]?.full ||
-                            "/images/placeholder.PNG"
-                          }
-                          alt="Model"
-                          className="max-w-xs md:max-w-md object-contain drop-shadow-2xl rounded-lg"
-                        />
-                      </motion.div>
+              <div className="flex flex-wrap gap-3">
+                <span className="shell-chip">Hero slides: {heroPages.length}</span>
+                <span className="shell-chip">Active slides: {activeHeroCount}</span>
+                <span className="shell-chip">
+                  Preview: {heroPages.length ? `${currentIndex + 1} of ${heroPages.length}` : "Empty"}
+                </span>
+              </div>
+            </div>
+          </section>
 
-                      <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="flex-1 text-center md:text-left py-6"
-                      >
-                        <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 leading-tight drop-shadow-lg">
-                          {currentHero.title}
-                        </h1>
-                        <p className="text-lg md:text-xl mb-8 text-blue-100 max-w-xl mx-auto md:mx-0 leading-relaxed">
-                          {currentHero.subtitle}
-                        </p>
-                        <div className="mt-4">
-                          <a
-                            href="#"
-                            className="px-8 py-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow-lg hover:from-blue-600 hover:to-blue-800 transition-all"
+          <section className="relative w-full">
+            {heroPages.length === 0 ? (
+              <div className="shell-panel px-6 py-16 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+                  Hero preview
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold text-[var(--mm-ink)]">
+                  No hero pages yet
+                </h2>
+                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-500">
+                  Create your first campaign below to see the storefront preview and carousel controls here.
+                </p>
+              </div>
+            ) : (
+              <div className="shell-panel overflow-hidden p-2 sm:p-3">
+                <AnimatePresence mode="wait">
+                  {currentHero && (
+                    <motion.section
+                      key={currentHero._id}
+                      {...bind()}
+                      initial={{ opacity: 0, x: 200 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -200 }}
+                      transition={{ duration: 0.5 }}
+                      className="relative flex h-[460px] w-full items-center justify-center overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,var(--mm-navy),#16357a_54%,var(--mm-blue))]"
+                    >
+                      <div className="absolute inset-0 overflow-hidden">
+                        {currentHero.bgImage?.[0]?.full ? (
+                          <Image
+                            src={currentHero.bgImage[0].full}
+                            alt="Hero background"
+                            fill
+                            unoptimized
+                            sizes="100vw"
+                            className="object-cover scale-105 blur-sm brightness-95 transition-all duration-700"
+                          />
+                        ) : (
+                          <div className="h-full w-full animate-pulse bg-blue-100" />
+                        )}
+                        <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(15,23,42,0.78),rgba(15,23,42,0.38),rgba(15,23,42,0.62))]" />
+                      </div>
+
+                      <div className="absolute inset-x-6 top-6 flex flex-wrap items-center justify-between gap-3 text-white">
+                        <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-blue-100/90 backdrop-blur-sm">
+                          {currentHero.status || "active"}
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => editHeroPage(currentHero)}
+                            className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/20"
                           >
-                            {currentHero.ctaText}
-                          </a>
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => removeHeroPage(currentHero._id)}
+                            className="rounded-full border border-rose-200/10 bg-rose-500/75 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600"
+                          >
+                            Delete
+                          </button>
                         </div>
-                      </motion.div>
-                    </div>
+                      </div>
 
-                    {/* Controls */}
-                    {heroPages.length > 1 && (
-                      <>
-                        <button
-                          onClick={prevHero}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-blue-100 text-blue-700 rounded-full p-3 shadow-md transition"
+                      <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-10 px-6 py-10 text-white md:flex-row md:px-10">
+                        <motion.div
+                          initial={{ opacity: 0, y: 40 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6 }}
+                          className="hidden flex-1 justify-center md:flex md:justify-start"
                         >
-                          &#8592;
-                        </button>
-                        <button
-                          onClick={nextHero}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-blue-100 text-blue-700 rounded-full p-3 shadow-md transition"
+                          <Image
+                            src={
+                              currentHero.image?.[0]?.full ||
+                              "/images/placeholder.PNG"
+                            }
+                            alt="Model"
+                            width={420}
+                            height={520}
+                            unoptimized
+                            className="h-auto w-auto max-w-xs rounded-[28px] object-contain drop-shadow-2xl md:max-w-md"
+                          />
+                        </motion.div>
+
+                        <motion.div
+                          initial={{ opacity: 0, x: 50 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.6, delay: 0.2 }}
+                          className="flex-1 py-6 text-center md:text-left"
                         >
-                          &#8594;
-                        </button>
-                      </>
-                    )}
+                          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-100/80">
+                            Storefront campaign
+                          </p>
+                          <h1 className="mt-4 font-serif text-4xl font-bold leading-tight text-white drop-shadow-lg md:text-5xl">
+                            {currentHero.title}
+                          </h1>
+                          <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-blue-100 md:mx-0 md:text-xl">
+                            {currentHero.subtitle}
+                          </p>
+                          <div className="mt-8">
+                            <a
+                              href="#"
+                              className="inline-flex rounded-full bg-white px-8 py-3 text-sm font-semibold text-[var(--mm-navy)] shadow-lg transition hover:bg-blue-50"
+                            >
+                              {currentHero.ctaText}
+                            </a>
+                          </div>
+                        </motion.div>
+                      </div>
 
-                    {/* Actions */}
-                    <div className="absolute top-4 right-4 flex space-x-2">
-                      <button
-                        onClick={() => editHeroPage(currentHero)}
-                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => removeHeroPage(currentHero._id)}
-                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </motion.section>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
+                      {heroPages.length > 1 && (
+                        <>
+                          <button
+                            onClick={prevHero}
+                            className="absolute left-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-md backdrop-blur-sm transition hover:bg-white/20"
+                          >
+                            &#8592;
+                          </button>
+                          <button
+                            onClick={nextHero}
+                            className="absolute right-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-md backdrop-blur-sm transition hover:bg-white/20"
+                          >
+                            &#8594;
+                          </button>
+                        </>
+                      )}
+                    </motion.section>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+          </section>
 
-        {/* Add/Edit Form */}
-        <div className="w-full flex flex-col md:flex-row items-start justify-center gap-10">
-          <div className="space-y-5 w-full max-w-4xl bg-white shadow-xl border border-blue-100 rounded-2xl py-10 px-6">
-            <h2 className="text-2xl font-semibold text-blue-900">
-              {editId ? "Edit Hero" : "Add New Hero"}
-            </h2>
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+            <section className="shell-panel p-6 lg:p-8">
+              <div className="mb-6 flex flex-col gap-2 border-b border-white/80 pb-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+                    Hero editor
+                  </p>
+                  <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">
+                    {editId ? "Edit hero" : "Add new hero"}
+                  </h2>
+                </div>
+                <p className="text-sm text-slate-500">Uploads are optimized server-side into full and thumbnail WebP assets.</p>
+              </div>
 
-            <input
-              type="text"
-              value={heroTitle}
-              onChange={(e) => setHeroTitle(e.target.value)}
-              placeholder="Hero Title"
-              className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-            />
+              <div className="grid gap-4 md:grid-cols-2">
+                <input
+                  type="text"
+                  value={heroTitle}
+                  onChange={(e) => setHeroTitle(e.target.value)}
+                  placeholder="Hero Title"
+                  className="md:col-span-2 !py-3"
+                />
 
-            <input
-              type="text"
-              value={heroSubtitle}
-              onChange={(e) => setHeroSubtitle(e.target.value)}
-              placeholder="Hero Subtitle"
-              className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-            />
+                <input
+                  type="text"
+                  value={heroSubtitle}
+                  onChange={(e) => setHeroSubtitle(e.target.value)}
+                  placeholder="Hero Subtitle"
+                  className="md:col-span-2 !py-3"
+                />
 
-            <input
-              type="text"
-              value={ctaText}
-              onChange={(e) => setCtaText(e.target.value)}
-              placeholder="CTA Text"
-              className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-            />
+                <input
+                  type="text"
+                  value={ctaText}
+                  onChange={(e) => setCtaText(e.target.value)}
+                  placeholder="CTA Text"
+                  className="!py-3"
+                />
 
-            <input
-              type="text"
-              value={ctaLink}
-              onChange={(e) => setCtaLink(e.target.value)}
-              placeholder="CTA Link"
-              className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-            />
+                <input
+                  type="text"
+                  value={ctaLink}
+                  onChange={(e) => setCtaLink(e.target.value)}
+                  placeholder="CTA Link"
+                  className="!py-3"
+                />
 
-            <input
-              type="number"
-              value={order}
-              onChange={(e) => setOrder(Number(e.target.value))}
-              placeholder="Order"
-              className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-            />
+                <input
+                  type="number"
+                  value={order}
+                  onChange={(e) => setOrder(Number(e.target.value))}
+                  placeholder="Order"
+                  className="!py-3"
+                />
 
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-
-            {/* Upload Sections */}
-            {renderUploader("Hero Image", heroImageRef, handleHeroImageChange, heroProgress, heroImage, setHeroImage)}
-            {renderUploader("Background Image", heroBgImageRef, handleBgImageChange, heroBgProgress, heroBgImage, setHeroBgImage)}
-
-            <div className="flex space-x-3 mt-6">
-              <button
-                onClick={addOrUpdateHeroPage}
-                disabled={uploading}
-                className={`px-5 py-2.5 rounded-lg text-white font-semibold shadow-md transition-all ${
-                  uploading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
-                }`}
-              >
-                {uploading ? "Saving..." : editId ? "Update Hero" : "Add Hero"}
-              </button>
-
-              {editId && (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-blue-50 text-blue-700 font-semibold shadow-md transition-all"
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="!py-3"
                 >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </div>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
 
-          <div className="w-full max-w-4xl bg-white shadow-xl border border-blue-100 rounded-2xl p-6">
+              <div className="mt-6 space-y-4">
+                {renderUploader(
+                  "Hero Image",
+                  heroImageRef,
+                  handleHeroImageChange,
+                  heroProgress,
+                  heroImage,
+                  setHeroImage
+                )}
+                {renderUploader(
+                  "Background Image",
+                  heroBgImageRef,
+                  handleBgImageChange,
+                  heroBgProgress,
+                  heroBgImage,
+                  setHeroBgImage
+                )}
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button
+                  onClick={addOrUpdateHeroPage}
+                  disabled={uploading}
+                  className={`rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(29,78,216,0.22)] transition-all ${
+                    uploading
+                      ? "cursor-not-allowed bg-slate-400"
+                      : "bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))]"
+                  }`}
+                >
+                  {uploading ? "Saving..." : editId ? "Update Hero" : "Add Hero"}
+                </button>
+
+                {editId && (
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </section>
+
             <PromotionManagement />
           </div>
         </div>
@@ -410,15 +476,24 @@ export default function HeroSetup() {
 
 function renderUploader(label, ref, handleChange, progress, images, setImages) {
   return (
-    <div className="flex flex-col space-y-2">
-      <span className="font-medium text-blue-800">{label}</span>
-      <button
-        type="button"
-        onClick={() => ref.current?.click()}
-        className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 text-blue-700 w-fit transition"
-      >
-        Upload {label}
-      </button>
+    <div className="rounded-[28px] border border-white/70 bg-white/72 p-4 shadow-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--mm-muted)]">
+            {label}
+          </span>
+          <p className="mt-2 text-sm text-slate-500">
+            Upload a polished storefront asset for this hero placement.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => ref.current?.click()}
+          className="inline-flex w-fit rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[var(--mm-blue)] hover:bg-blue-50"
+        >
+          Upload {label}
+        </button>
+      </div>
       <input
         type="file"
         ref={ref}
@@ -429,25 +504,28 @@ function renderUploader(label, ref, handleChange, progress, images, setImages) {
         className="hidden"
       />
       {progress > 0 && progress < 100 && (
-        <div className="w-full bg-blue-100 rounded-full h-2">
+        <div className="mt-4 h-2 w-full rounded-full bg-slate-200/80">
           <div
-            className="bg-blue-500 h-2 rounded-full"
+            className="h-2 rounded-full bg-[linear-gradient(90deg,var(--mm-gold),var(--mm-blue))]"
             style={{ width: `${progress}%` }}
           />
         </div>
       )}
-      <div className="flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-3">
         {images.map((img, idx) => (
-          <div key={idx} className="relative">
-            <img
+          <div key={idx} className="relative overflow-hidden rounded-[22px] border border-white bg-white/90 p-1 shadow-sm">
+            <Image
               src={img.full}
               alt={label}
-              className="w-20 h-20 object-cover rounded border border-blue-200 shadow"
+              width={80}
+              height={80}
+              unoptimized
+              className="h-20 w-20 rounded-[18px] object-cover"
             />
             <button
               type="button"
               onClick={() => setImages((prev) => prev.filter((_, i) => i !== idx))}
-              className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1"
+              className="absolute right-1 top-1 rounded-full bg-rose-500 px-1.5 text-xs text-white"
             >
               ✕
             </button>

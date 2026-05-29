@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Chart as ChartJS,
   BarElement,
@@ -84,7 +84,7 @@ export default function Reporting() {
     }
   };
 
-  async function fetchReportData(forceRefresh = false) {
+  const fetchReportData = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
 
@@ -122,11 +122,11 @@ export default function Reporting() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedLocation, selectedDays, granularity, dateFrom, dateTo]);
 
   useEffect(() => {
     fetchReportData();
-  }, [selectedLocation, selectedDays, granularity, dateFrom, dateTo]);
+  }, [fetchReportData]);
 
   if (loading && !report) {
     return (

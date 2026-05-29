@@ -94,28 +94,116 @@ export default function Home() {
     : expenseData?.expenses || [];
   const orders = orderData?.orders || [];
 
-  const report = salesReport || {};
-  const summary = report.summary || {};
-  const topProducts = report.topProducts || [];
-  const byLocation = report.byLocation || [];
-  const byStaff = report.byStaff || [];
+  const summary = salesReport?.summary;
+  const topProducts = salesReport?.topProducts || [];
+  const byLocation = salesReport?.byLocation || [];
+  const byStaff = salesReport?.byStaff || [];
 
   // KPIs
   const kpis = useMemo(() => {
     return {
-      sales: summary.totalSales || 0,
+      sales: summary?.totalSales || 0,
       salesChangePercent: 8,
-      transactions: summary.totalTransactions || 0,
+      transactions: summary?.totalTransactions || 0,
       transactionsChangePercent: 5,
-      avgTransactionValue: summary.averageTransactionValue || 0,
+      avgTransactionValue: summary?.averageTransactionValue || 0,
       avgTransactionChangePercent: 3,
     };
-  }, [summary]);
+  }, [summary?.averageTransactionValue, summary?.totalSales, summary?.totalTransactions]);
 
   const totalExpenses = expenses.reduce(
     (sum, e) => sum + (Number(e.amount) || 0),
     0
   );
+  const activePeriodLabel =
+    periodLabels.find((option) => option.value === period)?.label || "Today";
+  const openOrdersCount = orders.filter(
+    (order) => !["Delivered", "Cancelled"].includes(order.status)
+  ).length;
+  const locationCount = Array.isArray(store.locations) ? store.locations.length : 0;
+  const brandName = store.storeName || "M&M Fashion";
+
+  const kpiCards = [
+    {
+      label: "Total Sales",
+      value: `₦${kpis.sales.toLocaleString()}`,
+      changePercent: kpis.salesChangePercent,
+      tone: "blue",
+    },
+    {
+      label: "Transactions",
+      value: kpis.transactions.toLocaleString(),
+      changePercent: kpis.transactionsChangePercent,
+      tone: "emerald",
+    },
+    {
+      label: "Avg. Transaction",
+      value: `₦${kpis.avgTransactionValue.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`,
+      changePercent: kpis.avgTransactionChangePercent,
+      tone: "amber",
+    },
+  ];
+
+  const spotlightStats = [
+    {
+      label: "Expense outflow",
+      value: `₦${totalExpenses.toLocaleString()}`,
+      note: "All logged operational costs",
+    },
+    {
+      label: "Open orders",
+      value: openOrdersCount.toLocaleString(),
+      note: "Awaiting fulfillment or delivery",
+    },
+    {
+      label: "Locations",
+      value: locationCount ? locationCount.toLocaleString() : "Not set",
+      note: "Registered selling points",
+    },
+  ];
+
+  const axisColor = "rgba(148, 163, 184, 0.18)";
+  const tickColor = "#5b6b85";
+  const sharedBarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: tickColor },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: axisColor },
+        ticks: { color: tickColor },
+      },
+    },
+  };
+
+  const sharedLineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: tickColor },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: axisColor },
+        ticks: { color: tickColor },
+      },
+    },
+  };
 
   // Bar chart for top products
   const salesByProductData = {
@@ -169,82 +257,110 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="p-6 bg-gradient-to-b from-blue-50 to-white min-h-screen">
-        <div className="max-w-screen-xl mx-auto space-y-8">
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-3xl font-bold text-blue-800">
-            Welcome, {user.name || "Admin"}
-          </h1>
-          <div className="flex gap-3">
-            <button
-              onClick={() => router.push("/products/new")}
-              className="bg-blue-700 text-white px-5 py-3 rounded-xl shadow hover:bg-blue-900"
-            >
-              + Add Product
-            </button>
-            <button
-              onClick={() => router.push("/reporting/reporting")}
-              className="bg-white border px-4 py-2 rounded-lg hover:bg-blue-50"
-            >
-              Reports
-            </button>
-          </div>
-        </header>
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-[90rem] space-y-8">
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="shell-panel overflow-hidden"
+          >
+            <div className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1.12fr)_minmax(18rem,22rem)] lg:p-8">
+              <div>
+                <span className="shell-pill">Dashboard overview</span>
+                <h1 className="mt-5 max-w-3xl text-[var(--mm-ink)]">
+                  Welcome back, {user.name || "Admin"}.
+                </h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
+                  {brandName} is currently tuned to the {activePeriodLabel.toLowerCase()} window.
+                  Track sales, order pressure, and expense movement from a cleaner inventory control room.
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    onClick={() => router.push("/products/new")}
+                    className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(29,78,216,0.24)]"
+                  >
+                    + Add Product
+                  </button>
+                  <button
+                    onClick={() => router.push("/reporting/reporting")}
+                    className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/92 px-5 py-3 text-sm font-semibold text-[var(--mm-navy)] shadow-sm hover:border-blue-200 hover:bg-blue-50"
+                  >
+                    Open Reports
+                  </button>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <span className="shell-chip">Store: {brandName}</span>
+                  <span className="shell-chip">Focus: {activePeriodLabel}</span>
+                  <span className="shell-chip">Orders in motion: {openOrdersCount}</span>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(150deg,var(--mm-navy),#16357a_52%,var(--mm-blue))] p-6 text-white shadow-[0_28px_70px_rgba(15,23,42,0.26)]">
+                <div className="absolute -right-10 -top-12 h-36 w-36 rounded-full border border-white/15" />
+                <div className="absolute bottom-0 right-0 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-blue-100/80">
+                  Live signal
+                </p>
+                <div className="mt-6 space-y-4">
+                  {spotlightStats.map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-3xl border border-white/12 bg-white/10 px-4 py-4 backdrop-blur-sm"
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-[0.26em] text-blue-100/80">
+                        {item.label}
+                      </p>
+                      <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
+                      <p className="mt-2 text-sm text-blue-100/75">{item.note}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.section>
 
         {/* Period Filter */}
-        <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
           {periodLabels.map((p) => (
             <button
               key={p.value}
               onClick={() => setPeriod(p.value)}
-              className={`text-sm px-4 py-2 rounded-lg border transition-all ${
+                className={`rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
                 period === p.value
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-blue-700 border-blue-200 hover:bg-blue-50"
+                    ? "border-transparent bg-[linear-gradient(135deg,var(--mm-navy),var(--mm-blue))] text-white shadow-[0_14px_28px_rgba(29,78,216,0.22)]"
+                    : "border border-white/80 bg-white/90 text-[var(--mm-navy)] shadow-sm hover:border-blue-200 hover:bg-blue-50"
               }`}
             >
               {p.label}
             </button>
           ))}
-        </div>
+          </div>
 
         {/* KPIs */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <KpiCard
-            label="Total Sales"
-            value={`₦${kpis.sales.toLocaleString()}`}
-            changePercent={kpis.salesChangePercent}
-          />
-          <KpiCard
-            label="Transactions"
-            value={kpis.transactions.toLocaleString()}
-            changePercent={kpis.transactionsChangePercent}
-          />
-          <KpiCard
-            label="Avg. Transaction"
-            value={`₦${kpis.avgTransactionValue.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`}
-            changePercent={kpis.avgTransactionChangePercent}
-          />
-        </section>
+          <section className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {kpiCards.map((card) => (
+              <KpiCard key={card.label} {...card} />
+            ))}
+          </section>
 
         {/* Charts */}
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           <ChartCard title="Top Selling Products">
-            <Bar data={salesByProductData} options={{ responsive: true }} />
+              <Bar data={salesByProductData} options={sharedBarOptions} />
           </ChartCard>
           <ChartCard title="Sales by Location">
-            <Line data={salesByLocationData} options={{ responsive: true }} />
+              <Line data={salesByLocationData} options={sharedLineOptions} />
           </ChartCard>
           <ChartCard title="Expense Breakdown">
-            <Bar data={expenseChart} options={{ responsive: true }} />
+              <Bar data={expenseChart} options={sharedBarOptions} />
           </ChartCard>
-        </section>
+          </section>
 
         {/* Lists */}
-        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           <ListCard
             title="Top Staff by Sales"
             items={byStaff.map((s) => ({
@@ -267,7 +383,7 @@ export default function Home() {
             }))}
           />
           <ListCard title="Recent Orders" items={recentOrders} />
-        </section>
+          </section>
         </div>
       </div>
     </Layout>
@@ -275,65 +391,105 @@ export default function Home() {
 }
 
 /* --- Reusable UI Cards --- */
-function KpiCard({ label, value, changePercent }) {
+function KpiCard({ label, value, changePercent, tone = "blue" }) {
   const isNegative = changePercent < 0;
+  const toneMap = {
+    blue: {
+      orb: "bg-blue-400/25",
+      label: "text-blue-700",
+      chip: "bg-blue-500/10 text-blue-700",
+    },
+    emerald: {
+      orb: "bg-emerald-400/25",
+      label: "text-emerald-700",
+      chip: "bg-emerald-500/10 text-emerald-700",
+    },
+    amber: {
+      orb: "bg-amber-400/25",
+      label: "text-amber-700",
+      chip: "bg-amber-500/12 text-amber-700",
+    },
+  };
+  const accent = toneMap[tone] || toneMap.blue;
+
   return (
-    <motion.div
-      whileHover={{ scale: 1.035 }}
+    <motion.article
+      whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 220 }}
-      className="bg-white rounded-xl shadow-sm p-5 flex flex-col items-center border border-blue-100 hover:shadow-md"
+      className="shell-panel p-6"
     >
-      <span className="text-2xl font-bold">{value}</span>
-      <span className="text-sm text-blue-600">{label}</span>
-      <span
-        className={`mt-2 font-semibold ${
-          isNegative ? "text-red-600" : "text-green-600"
-        }`}
-      >
-        {isNegative ? "▼" : "▲"} {Math.abs(changePercent)}%
-      </span>
-    </motion.div>
+      <div className={`absolute -right-8 top-0 h-24 w-24 rounded-full blur-2xl ${accent.orb}`} />
+      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+        {label}
+      </p>
+      <div className="mt-6 flex items-end justify-between gap-4">
+        <span className="text-3xl font-semibold text-[var(--mm-ink)]">{value}</span>
+        <span
+          className={`rounded-full px-3 py-1 text-sm font-semibold ${
+            isNegative
+              ? "bg-rose-500/10 text-rose-700"
+              : accent.chip
+          }`}
+        >
+          {isNegative ? "▼" : "▲"} {Math.abs(changePercent)}%
+        </span>
+      </div>
+      <p className={`mt-3 text-sm font-medium ${accent.label}`}>
+        Updated against the last comparison window
+      </p>
+    </motion.article>
   );
 }
 
 function ChartCard({ title, children }) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      className="bg-white rounded-xl shadow-sm p-5 border border-blue-100 h-[40vh]"
+    <motion.article
+      whileHover={{ y: -4 }}
+      className="shell-panel h-[420px] p-6"
     >
-      <h2 className="text-lg font-semibold mb-3">{title}</h2>
-      <div className="h-full">{children}</div>
-    </motion.div>
+      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+        Analytics
+      </p>
+      <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">{title}</h2>
+      <div className="mt-5 h-[calc(100%-4.75rem)]">{children}</div>
+    </motion.article>
   );
 }
 
 function ListCard({ title, items = [] }) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      className="bg-white rounded-xl shadow-sm p-5 border border-blue-100 h-[40vh] overflow-y-auto"
+    <motion.article
+      whileHover={{ y: -4 }}
+      className="shell-panel h-[420px] overflow-y-auto p-6"
     >
-      <h2 className="text-lg font-semibold mb-3">{title}</h2>
-      <ul className="space-y-2 text-sm">
+      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
+        Snapshot list
+      </p>
+      <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">{title}</h2>
+      <ul className="mt-5 space-y-3 text-sm">
         {items.length > 0 ? (
           items.map((item, idx) => (
             <li
               key={idx}
-              className="bg-blue-50 rounded-md px-3 py-2 flex justify-between items-center"
+              className="rounded-2xl border border-white/75 bg-[rgba(239,246,255,0.72)] px-4 py-3 shadow-sm"
             >
-              <div>
-                <div className="font-medium text-blue-900">{item.label}</div>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="font-medium text-[var(--mm-navy)]">{item.label}</div>
                 {item.meta && (
-                  <div className="text-xs text-blue-700">{item.meta}</div>
+                    <div className="mt-1 text-xs text-slate-500">{item.meta}</div>
                 )}
+                </div>
+                <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[var(--mm-blue)]/70 shadow-[0_0_0_4px_rgba(37,99,235,0.12)]" />
               </div>
             </li>
           ))
         ) : (
-          <li className="text-gray-400 italic">No data available</li>
+          <li className="rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center italic text-slate-400">
+            No data available
+          </li>
         )}
       </ul>
-    </motion.div>
+    </motion.article>
   );
 }

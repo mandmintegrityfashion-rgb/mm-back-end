@@ -1,4 +1,5 @@
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import ExpenseCategory from "@/models/ExpenseCategory";
 
 const defaultCategories = [
@@ -9,7 +10,8 @@ const defaultCategories = [
     "Supplies/Stock Purchase",
 ];
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   await mongooseConnect();
 
   // 👇 Seed default categories once if collection is empty
@@ -56,4 +58,4 @@ export default async function handler(req, res) {
   }
 
   return res.status(405).json({ error: "Method not allowed" });
-}
+});

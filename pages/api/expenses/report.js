@@ -1,10 +1,12 @@
 // pages/api/expenses/report.js
 
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import Expense from "@/models/Expense";
 import PDFDocument from "pdfkit";
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   await mongooseConnect();
 
   const expenses = await Expense.find().sort({ createdAt: -1 });
@@ -47,4 +49,4 @@ export default async function handler(req, res) {
   doc.fontSize(14).fillColor("black").text(`Total Expenses: ₦${total.toLocaleString()}`, { align: "right" });
 
   doc.end();
-}
+});

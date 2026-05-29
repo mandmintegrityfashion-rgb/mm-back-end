@@ -1,7 +1,7 @@
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import { Transaction } from "@/models/Transactions";
-import { Product } from "@/models/Product";
-import { Staff } from "@/models/Staff"; 
+import Product from "@/models/Product";
 import {
   startOfDay,
   startOfHour,
@@ -15,7 +15,8 @@ import {
   eachMonthOfInterval,
 } from "date-fns";
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   await mongooseConnect();
 
   const { location = "All", days = 14, period = "Day" } = req.query;
@@ -165,7 +166,16 @@ export default async function handler(req, res) {
         ? parseFloat((totalSales / totalTransactions).toFixed(2))
         : 0;
 
-    const lowStockItems = await Product.countDocuments({ stock: { $lte: 10 } });
+    const lowStockItems = await Product.countDocuments({
+      $expr: {
+        $lte: [
+          "$quantity",
+          {
+            $cond: [{ $gt: ["$minStock", 0] }, "$minStock", 10],
+          },
+        ],
+      },
+    });
 
     res.json({
       dates: sortedDates,
@@ -190,4 +200,4 @@ export default async function handler(req, res) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch report data" });
   }
-}
+});

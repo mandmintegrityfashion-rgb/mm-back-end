@@ -1,9 +1,11 @@
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import { Transaction } from "@/models/Transactions";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   await mongooseConnect();
 
   try {
@@ -45,6 +47,21 @@ export default async function handler(req, res) {
     let totalTransactions = allTransactions.length;
     const productStats = {};
 
+    const productIds = [
+      ...new Set(
+        allTransactions.flatMap((transaction) =>
+          (transaction.items || [])
+            .map((item) => item.productId)
+            .filter(Boolean)
+            .map((productId) => productId.toString())
+        )
+      ),
+    ];
+    const products = await Product.find({ _id: { $in: productIds } }).select("costPrice").lean();
+    const productCostMap = Object.fromEntries(
+      products.map((product) => [product._id.toString(), product.costPrice || 0])
+    );
+
     // 💰 Calculate totals
     for (const t of allTransactions) {
       totalSales += t.total || 0;
@@ -53,11 +70,8 @@ export default async function handler(req, res) {
         totalUnitsSold += item.qty || item.quantity || 0;
 
         const qty = item.qty || item.quantity || 0;
-        const price = item.salePriceIncTax || item.price || 0;
-
         if (item.productId) {
-          const product = await Product.findById(item.productId).select("costPrice");
-          if (product) totalCost += (product.costPrice || 0) * qty;
+          totalCost += (productCostMap[item.productId.toString()] || 0) * qty;
         }
 
         const name = item.name || "Unnamed Product";
@@ -157,4 +171,4 @@ export default async function handler(req, res) {
     console.error("Error generating report:", err);
     res.status(500).json({ error: "Failed to generate report" });
   }
-}
+});

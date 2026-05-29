@@ -1,13 +1,33 @@
 // pages/api/heroes/[id].js
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import Hero from "@/models/Hero";
+import { isValidObjectId } from "mongoose";
 
-export default async function handler(req, res) {
+function normalizeImageSet(images, required) {
+  const normalized = Array.isArray(images)
+    ? images
+        .map((image) => ({
+          full: String(image?.full || "").trim(),
+          thumb: String(image?.thumb || "").trim(),
+        }))
+        .filter((image) => image.full && image.thumb)
+    : [];
+
+  if (required && !normalized.length) {
+    throw new Error("Title and at least one Hero Image (full + thumb) are required");
+  }
+
+  return normalized;
+}
+
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
   await mongooseConnect(); // ✅ ensure DB connection
 
-  const { id } = req.query;
+  const id = String(req.query?.id || "").trim();
 
-  if (!id) {
+  if (!id || !isValidObjectId(id)) {
     return res.status(400).json({ error: "Hero ID is required" });
   }
 
@@ -19,15 +39,17 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "PUT") {
-      const { title, subtitle, image, bgImage, ctaText, ctaLink, order, status } = req.body;
+      const title = String(req.body?.title || "").trim();
+      const subtitle = String(req.body?.subtitle || "").trim();
+      const image = normalizeImageSet(req.body?.image, true);
+      const bgImage = normalizeImageSet(req.body?.bgImage, false);
+      const ctaText = String(req.body?.ctaText || "").trim();
+      const ctaLink = String(req.body?.ctaLink || "").trim();
+      const order = Number(req.body?.order || 0);
+      const status = String(req.body?.status || "active").trim() || "active";
 
-      // ✅ validate required fields
-      if (!title || !Array.isArray(image) || image.length === 0 || !image[0]?.full || !image[0]?.thumb) {
+      if (!title) {
         return res.status(400).json({ error: "Title and at least one Hero Image (full + thumb) are required" });
-      }
-
-      if (Array.isArray(bgImage) && bgImage.length > 0 && (!bgImage[0]?.full || !bgImage[0]?.thumb)) {
-        return res.status(400).json({ error: "Background image must include full + thumb" });
       }
 
       const updated = await Hero.findByIdAndUpdate(
@@ -51,6 +73,6 @@ export default async function handler(req, res) {
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (err) {
     console.error("Hero API error:", err);
-    return res.status(500).json({ error: "Server error" });
+    return res.status(500).json({ error: err.message || "Server error" });
   }
-}
+});

@@ -1,8 +1,11 @@
 import { mongooseConnect } from "@/lib/mongoose";
+import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import Order from "@/models/Order";
 import { Transaction } from "@/models/Transactions"; // Updated import
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
+  requireAdminSession(req);
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
@@ -22,11 +25,15 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "Order not found" });
     }
 
+    if (order.transactionId) {
+      return res.status(409).json({ error: "Transaction already exists for this order" });
+    }
+
     // Map products to match itemSchema format
-    const items = (order.products || []).map((product) => ({
-      productId: product.productId || null, // fallback if productId is missing
+    const items = ((order.cartProducts && order.cartProducts.length ? order.cartProducts : order.items) || []).map((product) => ({
+      productId: product.productId || null,
       name: product.name,
-      price: product.price,
+      salePriceIncTax: product.price,
       qty: product.quantity,
     }));
 
@@ -48,9 +55,11 @@ export default async function handler(req, res) {
       createdAt: new Date(),
     });
 
+    await Order.findByIdAndUpdate(orderId, { transactionId: transaction._id });
+
     return res.status(201).json({ message: "Transaction created", transaction });
   } catch (error) {
     console.error("Transaction creation failed:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
-}
+});

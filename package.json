@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext .js,.jsx --ignore-pattern .next/**",
+    "test": "tsx --test ./tests/models.validation.test.js"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.7.2",
@@ -25,7 +26,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "eslint": "8.57.1",
-    "eslint-config-next": "14.2.15",
+    "eslint-config-next": "15.5.15",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.23.12",
     "iron-session": "^8.0.4",
@@ -36,7 +37,7 @@
     "mongoose": "^8.14.1",
     "multiparty": "^4.2.3",
     "next": "^15.3.3",
-    "nodemailer": "^6.10.1",
+    "nodemailer": "^8.0.7",
     "pdfjs-dist": "^5.3.31",
     "pdfkit": "^0.17.1",
     "react": "18.3.1",
@@ -45,11 +46,13 @@
     "react-spinners": "^0.14.1",
     "react-webcam": "^7.2.0",
     "recharts": "^2.15.3",
+    "sharp": "^0.34.5",
     "swr": "^2.3.6"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.14"
+    "tailwindcss": "^3.4.14",
+    "tsx": "^4.21.0"
   }
 }

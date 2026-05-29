@@ -17,7 +17,7 @@ const StaffSchema = new Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      // In production, always hash this before saving
+      select: false,
     },
     role: {
       type: String,
