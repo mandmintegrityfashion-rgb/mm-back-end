@@ -1,7 +1,7 @@
 "use client";
 
 import Layout from "@/components/Layout";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -12,8 +12,6 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  PointElement,
-  LineElement,
   Title,
   Tooltip,
   Legend,
@@ -23,8 +21,6 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
-  PointElement,
-  LineElement,
   Title,
   Tooltip,
   Legend
@@ -96,7 +92,7 @@ export default function Home() {
 
   const summary = salesReport?.summary;
   const topProducts = salesReport?.topProducts || [];
-  const byLocation = salesReport?.byLocation || [];
+  const byCategory = salesReport?.byCategory || [];
   const byStaff = salesReport?.byStaff || [];
 
   // KPIs
@@ -120,7 +116,6 @@ export default function Home() {
   const openOrdersCount = orders.filter(
     (order) => !["Delivered", "Cancelled"].includes(order.status)
   ).length;
-  const locationCount = Array.isArray(store.locations) ? store.locations.length : 0;
   const brandName = store.storeName || "M&M Fashion";
 
   const kpiCards = [
@@ -158,35 +153,11 @@ export default function Home() {
       value: openOrdersCount.toLocaleString(),
       note: "Awaiting fulfillment or delivery",
     },
-    {
-      label: "Locations",
-      value: locationCount ? locationCount.toLocaleString() : "Not set",
-      note: "Registered selling points",
-    },
   ];
 
   const axisColor = "rgba(148, 163, 184, 0.18)";
   const tickColor = "#5b6b85";
   const sharedBarOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-    },
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: { color: tickColor },
-      },
-      y: {
-        beginAtZero: true,
-        grid: { color: axisColor },
-        ticks: { color: tickColor },
-      },
-    },
-  };
-
-  const sharedLineOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -217,16 +188,13 @@ export default function Home() {
     ],
   };
 
-  // Line chart by location
-  const salesByLocationData = {
-    labels: byLocation.map((loc) => loc.location),
+  const salesByCategoryData = {
+    labels: byCategory.map((category) => category.category),
     datasets: [
       {
-        label: "Sales by Location (₦)",
-        data: byLocation.map((loc) => loc.total),
-        borderColor: "#1E3A8A",
-        backgroundColor: "rgba(37,99,235,0.3)",
-        fill: true,
+        label: "Units Sold",
+        data: byCategory.map((category) => category.qty),
+        backgroundColor: "#1D4ED8",
       },
     ],
   };
@@ -349,8 +317,8 @@ export default function Home() {
           <ChartCard title="Top Selling Products">
               <Bar data={salesByProductData} options={sharedBarOptions} />
           </ChartCard>
-          <ChartCard title="Sales by Location">
-              <Line data={salesByLocationData} options={sharedLineOptions} />
+          <ChartCard title="Top Selling Categories" eyebrow="Top Selling Category">
+            <Bar data={salesByCategoryData} options={sharedBarOptions} />
           </ChartCard>
           <ChartCard title="Expense Breakdown">
               <Bar data={expenseChart} options={sharedBarOptions} />
@@ -438,14 +406,14 @@ function KpiCard({ label, value, changePercent, tone = "blue" }) {
   );
 }
 
-function ChartCard({ title, children }) {
+function ChartCard({ title, children, eyebrow = "Analytics" }) {
   return (
     <motion.article
       whileHover={{ y: -4 }}
       className="shell-panel h-[420px] p-6"
     >
       <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--mm-muted)]">
-        Analytics
+        {eyebrow}
       </p>
       <h2 className="mt-2 text-xl font-semibold text-[var(--mm-ink)]">{title}</h2>
       <div className="mt-5 h-[calc(100%-4.75rem)]">{children}</div>

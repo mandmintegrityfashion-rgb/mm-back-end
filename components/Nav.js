@@ -122,17 +122,8 @@ export default function Nav({ isOpen, onClose }) {
         }`}
       >
         <div className="flex h-full flex-col">
-          <div className="px-2 pt-6">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-blue-600 text-sm font-semibold uppercase tracking-[0.2em] text-white">
-              MM
-            </div>
-            <p className="mt-3 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Menu
-            </p>
-          </div>
-
-          <nav className="mt-6 flex-1 overflow-y-auto pb-6">
-            <ul className="space-y-4">
+          <nav className="mt-4 flex-1 overflow-visible pb-6 pt-2">
+            <ul className="space-y-4 px-2">
             {renderMenuItem("/", faHome, "Home")}
             {renderMenuItem("/setup/setup", faCog, "Setup")}
 

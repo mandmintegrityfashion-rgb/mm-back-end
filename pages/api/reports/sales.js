@@ -1,6 +1,7 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import { requireAdminSession, withSessionRoute } from "@/lib/session";
 import { Transaction } from "@/models/Transactions";
+import Product from "@/models/Product";
 
 export default withSessionRoute(async function handler(req, res) {
   requireAdminSession(req);
@@ -39,6 +40,7 @@ export default withSessionRoute(async function handler(req, res) {
           averageTransactionValue: 0,
         },
         topProducts: [],
+        byCategory: [],
         byStaff: [],
         byLocation: [],
       });
@@ -53,8 +55,29 @@ export default withSessionRoute(async function handler(req, res) {
     );
     const averageTransactionValue = totalSales / totalTransactions;
 
+    const productIds = new Set();
+    for (const t of transactions) {
+      for (const item of t.items || []) {
+        if (item.productId) {
+          productIds.add(item.productId.toString());
+        }
+      }
+    }
+
+    const products = productIds.size
+      ? await Product.find(
+          { _id: { $in: Array.from(productIds) } },
+          { category: 1 }
+        ).lean()
+      : [];
+    const categoryByProductId = {};
+    for (const product of products) {
+      categoryByProductId[product._id.toString()] = product.category || "Uncategorized";
+    }
+
     // --- Top-selling products ---
     const productMap = {};
+    const categoryMap = {};
     for (const t of transactions) {
       for (const item of t.items || []) {
         if (!productMap[item.name]) {
@@ -66,10 +89,25 @@ export default withSessionRoute(async function handler(req, res) {
         }
         productMap[item.name].qty += item.qty;
         productMap[item.name].total += item.salePriceIncTax * item.qty;
+
+        const categoryName = categoryByProductId[item.productId?.toString()] || "Uncategorized";
+        if (!categoryMap[categoryName]) {
+          categoryMap[categoryName] = {
+            category: categoryName,
+            qty: 0,
+            total: 0,
+          };
+        }
+        categoryMap[categoryName].qty += item.qty || 0;
+        categoryMap[categoryName].total += (item.salePriceIncTax || 0) * (item.qty || 0);
       }
     }
 
     const topProducts = Object.values(productMap)
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 10);
+
+    const byCategory = Object.values(categoryMap)
       .sort((a, b) => b.qty - a.qty)
       .slice(0, 10);
 
@@ -106,6 +144,7 @@ export default withSessionRoute(async function handler(req, res) {
         averageTransactionValue,
       },
       topProducts,
+      byCategory,
       byStaff,
       byLocation,
       range: { from, to },
