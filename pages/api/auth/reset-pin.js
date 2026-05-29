@@ -14,9 +14,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "PIN must be at least 4 digits" });
   }
 
-  await mongooseConnect();
-
   try {
+    await mongooseConnect();
+
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid request" });
 
@@ -44,6 +44,8 @@ export default async function handler(req, res) {
     return res.json({ ok: true, message: "PIN has been reset successfully!" });
   } catch (err) {
     console.error("Reset PIN error:", err);
-    return res.status(500).json({ error: "Failed to reset PIN" });
+    return res.status(err.statusCode || 500).json({
+      error: err.publicMessage || "Failed to reset PIN",
+    });
   }
 }

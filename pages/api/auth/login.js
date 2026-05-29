@@ -40,6 +40,8 @@ export default withSessionRoute(async function loginRoute(req, res) {
     res.json({ ok: true, user: req.session.user });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(err.statusCode || 500).json({
+      error: err.publicMessage || "Internal server error",
+    });
   }
 });

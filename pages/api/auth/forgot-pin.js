@@ -12,9 +12,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Email service is not configured" });
   }
 
-  await mongooseConnect();
-
   try {
+    await mongooseConnect();
+
     const user = await User.findOne({ email });
     if (!user) {
       // Don't reveal whether email exists
@@ -59,6 +59,8 @@ export default async function handler(req, res) {
     return res.json({ ok: true, message: "If this email is registered, a reset code has been sent." });
   } catch (err) {
     console.error("Forgot PIN error:", err);
-    return res.status(500).json({ error: "Failed to process request" });
+    return res.status(err.statusCode || 500).json({
+      error: err.publicMessage || "Failed to process request",
+    });
   }
 }
