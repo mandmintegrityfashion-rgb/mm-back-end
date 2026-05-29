@@ -96,7 +96,7 @@ export default function Layout({ children }) {
       <Nav isOpen={isNavOpen} onClose={closeNav} />
 
       {/* Main Content */}
-      <main className="flex-1 bg-slate-50 pt-16 sm:pl-64">{children}</main>
+      <main className="flex-1 bg-slate-50 pt-16 sm:pl-24">{children}</main>
     </div>
   );
 }
