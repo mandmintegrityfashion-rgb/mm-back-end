@@ -48,18 +48,18 @@ export default function Nav({ isOpen, onClose }) {
     };
   }, [router]);
 
-  const railItemClass = (isActive) =>
-    `flex flex-col items-center justify-center rounded-md px-2 py-4 text-center text-xs transition-colors duration-200 ${
+  const navItemClass = (isActive) =>
+    `flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium transition-colors duration-200 ${
       isActive
-        ? "bg-blue-600 font-semibold text-white shadow-sm"
-        : "text-blue-800 hover:bg-blue-50 hover:text-blue-600"
+        ? "border-blue-200 bg-blue-50 text-blue-700"
+        : "border-transparent text-slate-700 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900"
     }`;
 
   const subMenuItemClass = (isActive) =>
-    `flex items-center justify-between rounded-md px-4 py-3 text-sm font-medium transition-colors duration-200 ${
+    `flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors duration-200 ${
       isActive
-        ? "bg-blue-100 text-blue-700"
-        : "text-blue-800 hover:bg-blue-50 hover:text-blue-600"
+        ? "bg-blue-50 font-semibold text-blue-700"
+        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
     }`;
 
   const renderMenuItem = (href, icon, label) => (
@@ -70,12 +70,10 @@ export default function Nav({ isOpen, onClose }) {
           closeMenu();
           onClose();
         }}
-        className={railItemClass(pathname === href)}
+        className={navItemClass(pathname === href)}
       >
-        <FontAwesomeIcon icon={icon} className="h-5 w-5" />
-        <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
-          {label}
-        </span>
+        <FontAwesomeIcon icon={icon} className="h-4 w-4 shrink-0" />
+        <span className="truncate">{label}</span>
       </Link>
     </li>
   );
@@ -101,6 +99,21 @@ export default function Nav({ isOpen, onClose }) {
     });
 
   const isParentActive = (routes) => routes.some((r) => pathname.startsWith(r));
+  const isManageActive = isParentActive([
+    "/manage/products",
+    "/manage/categories",
+    "/manage/orders",
+  ]);
+  const isReportingActive = isParentActive([
+    "/reporting/reporting",
+    "/reporting/completed-Transaction",
+  ]);
+  const isExpensesActive = isParentActive([
+    "/expenses/expenses",
+    "/expenses/analysis",
+    "/expenses/tax-analysis",
+    "/expenses/tax-personal",
+  ]);
 
   return (
     <>
@@ -117,144 +130,120 @@ export default function Nav({ isOpen, onClose }) {
       {/* Sidebar */}
       <aside
         ref={sidebarRef} // ✅ Reference to detect outside clicks
-        className={`fixed left-0 top-16 z-20 h-[calc(100vh-4rem)] w-20 overflow-visible border-r border-blue-100 bg-white shadow-sm transform transition-transform duration-300 sm:translate-x-0 ${
+        className={`fixed left-0 top-16 z-20 h-[calc(100vh-4rem)] w-72 border-r border-slate-200 bg-white shadow-sm transform transition-transform duration-300 sm:w-64 sm:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
         }`}
       >
-        <div className="flex h-full flex-col">
-          <nav className="mt-4 flex-1 overflow-visible pb-6 pt-2">
-            <ul className="space-y-4 px-2">
-            {renderMenuItem("/", faHome, "Home")}
+        <div className="flex h-full flex-col overflow-y-auto px-4 py-5">
+          <div className="border-b border-slate-200 pb-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Navigation
+            </p>
+            <p className="mt-2 text-sm text-slate-600">
+              Move between inventory, reporting, and operating tools.
+            </p>
+          </div>
+
+          <nav className="mt-5 flex-1">
+            <ul className="space-y-2">
+            {renderMenuItem("/", faHome, "Home Dashboard")}
             {renderMenuItem("/setup/setup", faCog, "Setup")}
 
-            {/* Manage */}
-            <li className="relative">
+            <li>
               <button
                 type="button"
-                className={railItemClass(
-                  isParentActive([
-                    "/manage/products",
-                    "/manage/categories",
-                    "/manage/orders",
-                  ])
-                )}
+                aria-expanded={openMenu === "manage"}
+                aria-controls="manage-submenu"
+                className={navItemClass(isManageActive || openMenu === "manage")}
                 onClick={() => toggleMenu("manage")}
               >
-                <FontAwesomeIcon icon={faList} className="h-5 w-5" />
-                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
-                  Manage
-                </span>
+                <FontAwesomeIcon icon={faList} className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">Manage</span>
                 <FontAwesomeIcon
                   icon={faCaretRight}
-                  className={`mt-2 h-3 w-3 transition-transform duration-300 ${
+                  className={`h-3 w-3 shrink-0 transition-transform duration-200 ${
                     openMenu === "manage" ? "rotate-90" : ""
                   }`}
                 />
               </button>
 
-              <ul
-                className={`absolute left-full top-0 z-50 ml-3 w-52 rounded-md border border-blue-100 bg-white p-2 shadow-md transition-all duration-200 ${
-                  openMenu === "manage"
-                    ? "translate-x-0 opacity-100"
-                    : "translate-x-8 opacity-0 pointer-events-none"
+              <div
+                id="manage-submenu"
+                className={`overflow-hidden transition-all duration-200 ${
+                  openMenu === "manage" ? "max-h-64 pt-2" : "max-h-0"
                 }`}
               >
-                <div className="mb-2 border-b border-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">
-                  Manage Section
-                </div>
-                <div className="space-y-1.5">
+                <ul className="ml-4 space-y-1 border-l border-slate-200 pl-3">
                   {renderSubMenu([
-                    { href: "/manage/products", label: "Product List" },
+                    { href: "/manage/products", label: "Products" },
                     { href: "/manage/categories", label: "Categories" },
                     { href: "/manage/orders", label: "Orders" },
                   ])}
-                </div>
-              </ul>
+                </ul>
+              </div>
             </li>
 
-            {/* Reporting */}
-            <li className="relative">
+            <li>
               <button
                 type="button"
-                className={railItemClass(
-                  isParentActive([
-                    "/reporting/reporting",
-                    "/reporting/completed-Transaction",
-                  ])
-                )}
+                aria-expanded={openMenu === "reporting"}
+                aria-controls="reporting-submenu"
+                className={navItemClass(isReportingActive || openMenu === "reporting")}
                 onClick={() => toggleMenu("reporting")}
               >
-                <FontAwesomeIcon icon={faChartLine} className="h-5 w-5" />
-                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
-                  Reports
-                </span>
+                <FontAwesomeIcon icon={faChartLine} className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">Reporting</span>
                 <FontAwesomeIcon
                   icon={faCaretRight}
-                  className={`mt-2 h-3 w-3 transition-transform duration-300 ${
+                  className={`h-3 w-3 shrink-0 transition-transform duration-200 ${
                     openMenu === "reporting" ? "rotate-90" : ""
                   }`}
                 />
               </button>
 
-              <ul
-                className={`absolute left-full top-0 z-50 ml-3 w-52 rounded-md border border-blue-100 bg-white p-2 shadow-md transition-all duration-200 ${
-                  openMenu === "reporting"
-                    ? "translate-x-0 opacity-100"
-                    : "translate-x-8 opacity-0 pointer-events-none"
+              <div
+                id="reporting-submenu"
+                className={`overflow-hidden transition-all duration-200 ${
+                  openMenu === "reporting" ? "max-h-52 pt-2" : "max-h-0"
                 }`}
               >
-                <div className="mb-2 border-b border-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">
-                  Reports
-                </div>
-                <div className="space-y-1.5">
+                <ul className="ml-4 space-y-1 border-l border-slate-200 pl-3">
                   {renderSubMenu([
                     { href: "/reporting/reporting", label: "Reporting" },
                     {
                       href: "/reporting/completed-Transaction",
-                      label: "Completed Transaction",
+                      label: "Completed Transactions",
                     },
                   ])}
-                </div>
-              </ul>
+                </ul>
+              </div>
             </li>
 
-            {/* Expenses */}
-            <li className="relative">
+            <li>
               <button
                 type="button"
-                className={railItemClass(
-                  isParentActive([
-                    "/expenses/expenses",
-                    "/expenses/analysis",
-                    "/expenses/tax-analysis",
-                    "/expenses/tax-personal",
-                  ])
-                )}
+                aria-expanded={openMenu === "expenses"}
+                aria-controls="expenses-submenu"
+                className={navItemClass(isExpensesActive || openMenu === "expenses")}
                 onClick={() => toggleMenu("expenses")}
               >
-                <FontAwesomeIcon icon={faCoins} className="h-5 w-5" />
-                <span className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
-                  Expenses
-                </span>
+                <FontAwesomeIcon icon={faCoins} className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">Expenses</span>
                 <FontAwesomeIcon
                   icon={faCaretRight}
-                  className={`mt-2 h-3 w-3 transition-transform duration-300 ${
+                  className={`h-3 w-3 shrink-0 transition-transform duration-200 ${
                     openMenu === "expenses" ? "rotate-90" : ""
                   }`}
                 />
               </button>
 
-              <ul
-                className={`absolute left-full top-0 z-50 ml-3 w-52 rounded-md border border-blue-100 bg-white p-2 shadow-md transition-all duration-200 ${
-                  openMenu === "expenses"
-                    ? "translate-x-0 opacity-100"
-                    : "translate-x-8 opacity-0 pointer-events-none"
+              <div
+                id="expenses-submenu"
+                className={`overflow-hidden transition-all duration-200 ${
+                  openMenu === "expenses" ? "max-h-80 pt-2" : "max-h-0"
                 }`}
               >
-                <div className="mb-2 border-b border-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">
-                  Expenses
-                </div>
-                <div className="space-y-1.5">
+                <ul className="ml-4 space-y-1 border-l border-slate-200 pl-3">
                   {renderSubMenu([
                     { href: "/expenses/expenses", label: "Expenses Entry" },
                     { href: "/expenses/analysis", label: "Expenses Analysis" },
@@ -264,8 +253,8 @@ export default function Nav({ isOpen, onClose }) {
                       label: "Personal Tax Calculator",
                     },
                   ])}
-                </div>
-              </ul>
+                </ul>
+              </div>
             </li>
             </ul>
           </nav>
