@@ -5,9 +5,6 @@ import sharp from "sharp";
 import { randomUUID } from "crypto";
 import { requireAdminSession, withSessionRoute } from "@/lib/session";
 
-const S3BucketName =
-  process.env.S3_BUCKET_NAME || "mm-fashion-store-463183325467-eu-north-1-an";
-const S3Region = process.env.S3_REGION || "eu-north-1";
 const MAX_FILE_COUNT = 10;
 const MAX_FILE_SIZE = 6 * 1024 * 1024;
 const UPLOAD_CONCURRENCY = 3;
@@ -23,8 +20,41 @@ function createHttpError(statusCode, message) {
   return error;
 }
 
-function getPublicUrl(key) {
-  return `https://${S3BucketName}.s3.${S3Region}.amazonaws.com/${key}`;
+function normalizeEnvValue(value) {
+  const normalized = String(value || "").trim();
+
+  if (
+    normalized.length >= 2 &&
+    ((normalized.startsWith('"') && normalized.endsWith('"')) ||
+      (normalized.startsWith("'") && normalized.endsWith("'")))
+  ) {
+    return normalized.slice(1, -1).trim();
+  }
+
+  return normalized;
+}
+
+function getRequiredEnvValue(name) {
+  const value = normalizeEnvValue(process.env[name]);
+
+  if (!value) {
+    throw createHttpError(500, `${name} is not configured`);
+  }
+
+  return value;
+}
+
+function getS3Config() {
+  return {
+    bucketName: getRequiredEnvValue("S3_BUCKET_NAME"),
+    region: getRequiredEnvValue("S3_REGION"),
+    accessKeyId: getRequiredEnvValue("S3_ACCESS_KEY"),
+    secretAccessKey: getRequiredEnvValue("S3_SECRET_ACCESS_KEY"),
+  };
+}
+
+function getPublicUrl(bucketName, region, key) {
+  return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
 }
 
 async function mapWithConcurrency(items, concurrency, mapper) {
@@ -32,6 +62,7 @@ async function mapWithConcurrency(items, concurrency, mapper) {
   let nextIndex = 0;
 
   async function worker() {
+    
     while (true) {
       const currentIndex = nextIndex;
       nextIndex += 1;
@@ -58,10 +89,7 @@ export default withSessionRoute(async function ImageHandler(req, res) {
 
   try {
     requireAdminSession(req);
-
-    if (!process.env.S3_ACCESS_KEY || !process.env.S3_SECRET_ACCESS_KEY) {
-      throw createHttpError(500, "S3 credentials are not configured");
-    }
+    const s3Config = getS3Config();
 
     const form = new multiparty.Form({ maxFilesSize: MAX_FILE_SIZE * MAX_FILE_COUNT });
     const { fields, files } = await new Promise((resolve, reject) => {
@@ -78,10 +106,10 @@ export default withSessionRoute(async function ImageHandler(req, res) {
     }
 
     const client = new S3Client({
-      region: S3Region,
+      region: s3Config.region,
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+        accessKeyId: s3Config.accessKeyId,
+        secretAccessKey: s3Config.secretAccessKey,
       },
     });
 
@@ -131,7 +159,7 @@ export default withSessionRoute(async function ImageHandler(req, res) {
           await Promise.all([
             client.send(
               new PutObjectCommand({
-                Bucket: S3BucketName,
+                Bucket: s3Config.bucketName,
                 Key: fullKey,
                 Body: fullBuffer,
                 ACL: "public-read",
@@ -140,7 +168,7 @@ export default withSessionRoute(async function ImageHandler(req, res) {
             ),
             client.send(
               new PutObjectCommand({
-                Bucket: S3BucketName,
+                Bucket: s3Config.bucketName,
                 Key: thumbKey,
                 Body: thumbBuffer,
                 ACL: "public-read",
@@ -150,8 +178,8 @@ export default withSessionRoute(async function ImageHandler(req, res) {
           ]);
 
           return {
-            full: getPublicUrl(fullKey),
-            thumb: getPublicUrl(thumbKey),
+            full: getPublicUrl(s3Config.bucketName, s3Config.region, fullKey),
+            thumb: getPublicUrl(s3Config.bucketName, s3Config.region, thumbKey),
           };
         } catch (err) {
           console.error("Upload failed for file:", file.originalFilename, err);

@@ -8,6 +8,10 @@ export default async function handler(req, res) {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
 
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    return res.status(500).json({ error: "Email service is not configured" });
+  }
+
   await mongooseConnect();
 
   try {
