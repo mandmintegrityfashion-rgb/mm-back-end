@@ -13,8 +13,28 @@ export default function Layout({ children }) {
   useEffect(() => {
     let isMounted = true;
 
+    const redirectToLogin = async () => {
+      if (!isMounted || router.pathname === "/login") {
+        return;
+      }
+
+      try {
+        await router.replace("/login");
+      } catch (error) {
+        window.location.replace("/login");
+      }
+    };
+
     fetch("/api/auth/me")
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data?.error || "Failed to resolve session");
+        }
+
+        return data;
+      })
       .then((data) => {
         if (!isMounted) {
           return;
@@ -23,8 +43,11 @@ export default function Layout({ children }) {
         if (data.user) {
           setUser(data.user);
         } else {
-          router.push("/login");
+          redirectToLogin();
         }
+      })
+      .catch(() => {
+        redirectToLogin();
       })
       .finally(() => {
         if (isMounted) {
